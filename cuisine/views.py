@@ -1,33 +1,31 @@
 import datetime
 
 from django.shortcuts import render
-
+from contextlib import suppress
 
 from .models import Meal
 
 
 def show_next_week_menu(request):
     user_id = 1  #TODO get customer
-    weekdays = [
-        datetime.date.today() + datetime.timedelta(days=day) for day in range(1, 3)
-    ]
+    weekdays = count_days(7)
 
     meals = (
         Meal.objects
         .filter(date__in=weekdays)
         .filter(customer=user_id)
-        .prefetch_related('meal_positions__dish')
+        .prefetch_related('meal_positions')
     )
 
     meals_per_day = ((day, meals.filter(date=day)) for day in weekdays)
 
     serialized_meals = {}
     for day, daily_serving in meals_per_day:
-        daily_dishes = {
-            'breakfast': daily_serving.get(meal_type='BREAKFAST'),
-            'lunch': daily_serving.get(meal_type='LUNCH'),
-            'dinner': daily_serving.get(meal_type='DINNER'),
-        }
+        daily_dishes = {}
+        with suppress(Meal.DoesNotExist):
+            daily_dishes.setdefault('breakfast', daily_serving.get(meal_type='BREAKFAST'))
+            daily_dishes.setdefault('lunch', daily_serving.get(meal_type='LUNCH'))
+            daily_dishes.setdefault('dinner', daily_serving.get(meal_type='DINNER'))
         serialized_meals.setdefault(day, daily_dishes)
 
     return render(
@@ -38,10 +36,8 @@ def show_next_week_menu(request):
 
 def calculate_products(request):
     days_to_calculate = 2
-    weekdays = [
-        datetime.date.today() + datetime.timedelta(days=day)
-        for day in range(1, days_to_calculate + 1)
-    ]
+    weekdays = count_days(days_to_calculate)
+
     ingredients = (
         Meal.objects
         .filter(date__in=weekdays)
@@ -53,13 +49,18 @@ def calculate_products(request):
 
     total_ingredients = {}
     for ingredient, quantity in ingredients:
-        if ingredient not in total_ingredients:
-            total_ingredients[ingredient] = quantity
-        else:
-            total_ingredients[ingredient] += quantity
+        total_ingredients.setdefault(ingredient, 0)
+        total_ingredients[ingredient] += quantity
 
     return render(
         request,
         'temp_calc.html',
         context={'ingredients': total_ingredients},
     )
+
+
+def count_days(days_count):
+    return [
+        datetime.date.today() + datetime.timedelta(days=day)
+        for day in range(1, days_count + 1)
+    ]
