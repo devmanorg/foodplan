@@ -44,15 +44,6 @@ class Dish(models.Model):
     )
     image = models.ImageField(
         'изображение',
-        upload_to='images/'
-    )
-    menu_category = models.ForeignKey(
-        MenuCategory,
-        verbose_name='категория меню',
-        related_name='dishes',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
     )
 
     class Meta:
@@ -106,7 +97,7 @@ class IngredientPosition(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         verbose_name='ингредиент',
-        related_name='positions',
+        related_name='позиция',
         on_delete=models.CASCADE,
     )
     quantity = models.PositiveSmallIntegerField(
