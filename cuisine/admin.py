@@ -8,6 +8,11 @@ class MenuCategoryAdmin(admin.ModelAdmin):
     fields = ('name', 'menu_type')
 
 
+class MenuCategoryInLine(admin.TabularInline):
+    model = Dish.menu_category.through
+    extra = 2
+
+
 class TagInline(admin.TabularInline):
     model = Dish.tags.through
     extra = 1
@@ -20,7 +25,7 @@ class IngredientPositionInline(admin.TabularInline):
 
 @admin.register(Dish)
 class DishAdmin(admin.ModelAdmin):
-    inlines = (TagInline, IngredientPositionInline)
+    inlines = (MenuCategoryInLine, TagInline, IngredientPositionInline)
 
 
 @admin.register(Tag)
