@@ -37,6 +37,8 @@ class Tag(models.Model):
         Dish,
         related_name='tags',
         verbose_name='блюда',
+        blank=True,
+        null=True,
     )
 
     class Meta:
@@ -106,10 +108,6 @@ class Meal(models.Model):
         blank=True,
         db_index=True,
     )
-    quantity = models.PositiveSmallIntegerField(
-        'число',
-        validators=[MinValueValidator(1)],
-    )
     date = models.DateField(
         'дата',
         db_index=True,
@@ -120,7 +118,7 @@ class Meal(models.Model):
         verbose_name_plural = 'приемы пищи'
 
     def __str__(self):
-        return self.meal_type
+        return f'{self.get_meal_type_display().title()} {self.date}'
 
 
 class MealPosition(models.Model):
