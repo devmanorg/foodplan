@@ -1,6 +1,16 @@
 from django.contrib import admin
 
-from .models import Dish, Tag, Ingredient, IngredientPosition, Meal, MealPosition
+from .models import Dish, Tag, Ingredient, IngredientPosition, Meal, MealPosition, MenuCategory
+
+
+@admin.register(MenuCategory)
+class MenuCategoryAdmin(admin.ModelAdmin):
+    fields = ('name', 'menu_type')
+
+
+class MenuCategoryInLine(admin.TabularInline):
+    model = Dish.menu_category.through
+    extra = 2
 
 
 class TagInline(admin.TabularInline):
@@ -8,14 +18,14 @@ class TagInline(admin.TabularInline):
     extra = 1
 
 
-class IngredientPostionInline(admin.TabularInline):
+class IngredientPositionInline(admin.TabularInline):
     model = IngredientPosition
     extra = 3
 
 
 @admin.register(Dish)
 class DishAdmin(admin.ModelAdmin):
-    inlines = (TagInline, IngredientPostionInline)
+    inlines = (MenuCategoryInLine, TagInline, IngredientPositionInline)
 
 
 @admin.register(Tag)
