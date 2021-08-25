@@ -4,7 +4,7 @@ from .models import Dish, Tag, Ingredient, IngredientPosition, Meal, MealPositio
 
 
 @admin.register(MenuCategory)
-class MenuCategoryAdmin(admin.ModelAdmin):
+class TagAdmin(admin.ModelAdmin):
     fields = ('name', 'menu_type')
 
 
