@@ -1,11 +1,6 @@
 from django.contrib import admin
 
-from .models import Dish, Tag, Ingredient, IngredientPosition, Meal, MealPosition, MenuCategory
-
-
-@admin.register(MenuCategory)
-class TagAdmin(admin.ModelAdmin):
-    fields = ('name', 'menu_type')
+from .models import Dish, Tag, Ingredient, IngredientPosition, Meal, MealPosition
 
 
 class TagInline(admin.TabularInline):
