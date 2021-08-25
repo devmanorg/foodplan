@@ -38,8 +38,6 @@ class Tag(models.Model):
         Dish,
         related_name='tags',
         verbose_name='блюда',
-        blank=True,
-        null=True,
     )
 
     class Meta:
@@ -50,7 +48,7 @@ class Tag(models.Model):
         return self.name
 
 
-class Ingridient(models.Model):
+class Ingredient(models.Model):
     name = models.CharField(
         'название',
         max_length=50,
@@ -68,9 +66,9 @@ class Ingridient(models.Model):
         return self.name
 
 
-class IngridientPosition(models.Model):
-    ingridient = models.ForeignKey(
-        Ingridient,
+class IngredientPosition(models.Model):
+    ingredient = models.ForeignKey(
+        Ingredient,
         verbose_name='ингридиент',
         related_name='позиция',
         on_delete=models.CASCADE,
@@ -92,7 +90,7 @@ class IngridientPosition(models.Model):
         verbose_name_plural = 'позиции ингридиентов блюда'
 
     def __str__(self):
-        return self.ingridient.name
+        return self.ingredient.name
 
 
 class Meal(models.Model):
