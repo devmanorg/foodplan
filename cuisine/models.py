@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.contrib.auth.models import User
 
 
 class Dish(models.Model):
@@ -111,6 +112,12 @@ class Meal(models.Model):
     date = models.DateField(
         'дата',
         db_index=True,
+    )
+    customer = models.ForeignKey(
+        User,
+        verbose_name='пользователь',
+        related_name='meals',
+        on_delete=models.CASCADE,
     )
 
     class Meta:
