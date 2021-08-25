@@ -19,13 +19,6 @@ class MenuCategory(models.Model):
         blank=True,
         db_index=True,
     )
-    dishes = models.ManyToManyField(
-        'Dish',
-        verbose_name='блюда',
-        related_name='menu_category',
-        blank=True,
-        null=True
-    )
 
     class Meta:
         verbose_name = 'тип меню'
@@ -52,6 +45,14 @@ class Dish(models.Model):
     image = models.ImageField(
         'изображение',
         upload_to='images/'
+    )
+    menu_category = models.ForeignKey(
+        MenuCategory,
+        verbose_name='категория меню',
+        related_name='dishes',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
     )
 
     class Meta:
