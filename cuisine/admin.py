@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Dish, Tag, Ingridient, IngridientPosition, Meal, MealPosition
+from .models import Dish, Tag, Ingredient, IngredientPosition, Meal, MealPosition
 
 
 class TagInline(admin.TabularInline):
@@ -8,14 +8,14 @@ class TagInline(admin.TabularInline):
     extra = 1
 
 
-class IngridientPostionInline(admin.TabularInline):
-    model = IngridientPosition
+class IngredientPositionInline(admin.TabularInline):
+    model = IngredientPosition
     extra = 3
 
 
 @admin.register(Dish)
 class DishAdmin(admin.ModelAdmin):
-    inlines = (TagInline, IngridientPostionInline)
+    inlines = (TagInline, IngredientPositionInline)
 
 
 @admin.register(Tag)
@@ -23,8 +23,8 @@ class TagAdmin(admin.ModelAdmin):
     fields = ('name',)
 
 
-@admin.register(Ingridient)
-class IngridientAdmin(admin.ModelAdmin):
+@admin.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
     pass
 
 
