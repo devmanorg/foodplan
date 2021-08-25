@@ -19,6 +19,7 @@ class Dish(models.Model):
     )
     image = models.ImageField(
         'изображение',
+        upload_to='images/'
     )
 
     class Meta:
