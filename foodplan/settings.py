@@ -24,7 +24,7 @@ STATICFILES_DIRS = [
 SECRET_KEY = 'django-insecure-6m2=(1i4_+@xvjdhkdqf#q@j5t5*!o=lz@_!tnmod&o7%skg1a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', False)
 
 ALLOWED_HOSTS = ['foodplanlike.pythonanywhere.com']
 
