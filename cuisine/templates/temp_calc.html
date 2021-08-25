@@ -1,0 +1,16 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Ингредиент</th>
+      <th scope="col">Количество</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ingredient, quantity in ingredients.items %}
+      <tr>
+        <td>{{ingredient}}</td>
+        <td>{{quantity}}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

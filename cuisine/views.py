@@ -36,4 +36,30 @@ def show_next_week_menu(request):
     )
 
 
-# def calculate_products(request):
+def calculate_products(request):
+    days_to_calculate = 2
+    weekdays = [
+        datetime.date.today() + datetime.timedelta(days=day)
+        for day in range(1, days_to_calculate + 1)
+    ]
+    ingredients = (
+        Meal.objects
+        .filter(date__in=weekdays)
+        .values_list(
+            'meal_positions__dish__positions__ingredient__name',
+            'meal_positions__dish__positions__quantity',
+        )
+    )
+
+    total_ingredients = {}
+    for ingredient, quantity in ingredients:
+        if ingredient not in total_ingredients:
+            total_ingredients[ingredient] = quantity
+        else:
+            total_ingredients[ingredient] += quantity
+
+    return render(
+        request,
+        'temp_calc.html',
+        context={'ingredients': total_ingredients},
+    )
