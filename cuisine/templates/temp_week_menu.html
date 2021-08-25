@@ -1,28 +1,22 @@
-<!DOCTYPE html>
-<html>
-<body>
 {% for date, daily_serving in meals.items %}
-      <p>{{ date }}</p>
-  <div class="container">
-    <div class="row row-cols-2">
-    {% for meal_type, meal in daily_serving.items %}
-      <p>{{meal_type}}</p>
-      <div class="col">
-        <div class="card mb-3" style="max-width: 540px;">
-          <div class="row no-gutters">
-      {% for position in meal.meal_positions.all %}
-            <div class="col-md-4">
-              <h5 class="card-title">{{position.dish}}</h5>
-              <img src="{{position.dish.image.url}}" class="card-img" style="max-width: 54px;">
-            </div>
-      {% endfor %}
-            </div>
-          </div>
-        </div>
-      </div>
-    {% endfor %}
-    </div>
-  </div>
+  {{date}}
+  <table class="table">
+    <thead>
+      <tr>
+       {% for meal_type in daily_serving %}
+        <th scope="col">{{meal_type}}</th>
+       {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        {% for meal in daily_serving.values %}
+          {% for position in meal.meal_positions.all %}
+            <td>{{position.dish}}</td>
+            <td><img src="{{position.dish.image.url}}" class="card-img" style="max-width: 54px;"></td>
+          {% endfor %}
+        {% endfor %}
+      </tr>
+    </tbody>
+  </table>
 {% endfor %}
-</body>
-</html>
