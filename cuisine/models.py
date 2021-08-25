@@ -3,6 +3,31 @@ from django.core.validators import MinValueValidator
 from django.contrib.auth.models import User
 
 
+class MenuCategory(models.Model):
+    MENU_TYPE = (
+        ('DAILY', 'ежедневное'),
+        ('WEEKLY', 'недельное'),
+    )
+    name = models.CharField(
+        'название',
+        max_length=50,
+    )
+    menu_type = models.CharField(
+        'тип приема пищи',
+        max_length=20,
+        choices=MENU_TYPE,
+        blank=True,
+        db_index=True,
+    )
+
+    class Meta:
+        verbose_name = 'тип меню'
+        verbose_name_plural = 'типы меню'
+
+    def __str__(self):
+        return f'{self.name} {self.menu_type}'
+
+
 class Dish(models.Model):
     name = models.CharField(
         'название',
