@@ -39,8 +39,6 @@ class Tag(models.Model):
         Dish,
         related_name='tags',
         verbose_name='блюда',
-        blank=True,
-        null=True,
     )
 
     class Meta:
@@ -73,7 +71,7 @@ class IngredientPosition(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         verbose_name='ингредиент',
-        related_name='позиция',
+        related_name='positions',
         on_delete=models.CASCADE,
     )
     quantity = models.PositiveSmallIntegerField(

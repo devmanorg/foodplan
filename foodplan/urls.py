@@ -24,7 +24,8 @@ from cuisine import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('week_menu/', views.show_next_week_menu),
-    path('calculator', views.calculate_products),
+    path('calculator/', views.calculate_products),
+    path('recipe/<int:recipe_id>', views.view_recipe, name='recipe'),
     path('__debug__/', include(debug_toolbar.urls)),
 ]
 

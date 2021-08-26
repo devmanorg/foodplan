@@ -1,3 +1,4 @@
+<div class="container">
 {% for date, daily_serving in meals.items %}
   {{date}}
   <table class="table">
@@ -12,7 +13,7 @@
       <tr>
         {% for meal in daily_serving.values %}
           {% for position in meal.meal_positions.all %}
-            <td>{{position.dish}}</td>
+            <td><a href="{% url 'recipe' position.dish.id %}">{{position.dish}}</a></td>
             <td><img src="{{position.dish.image.url}}" class="card-img" style="max-width: 54px;"></td>
           {% endfor %}
         {% endfor %}
@@ -20,3 +21,4 @@
     </tbody>
   </table>
 {% endfor %}
+</div>

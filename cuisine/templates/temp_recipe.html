@@ -1,0 +1,27 @@
+  <div class="container">
+    <center>
+      <h2>Рецепт</h2>
+    </center>
+
+    <hr/>
+
+    <table class="table table-responsive">
+      <tr>
+        <th>Название</th>
+        <th>Картинка</th>
+        <th>Время готовки</th>
+        <th>Ингредиенты</th>
+      </tr>
+
+      <tr>
+        <td>{{ recipe.name }}</td>
+        <td><img src="{{ recipe.image.url }}" style="max-width: 100"></td>
+        <td>{{ recipe.cooking_time }}</td>
+        <td>
+          {% for position in recipe.positions.all %}
+            {{ position.ingredient }} - {{ position.quantity }} {{ position.ingredient.units }}
+          {% endfor %}
+        </td>
+      </tr>
+
+  </div>

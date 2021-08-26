@@ -1,9 +1,11 @@
 import datetime
 
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from contextlib import suppress
 
-from .models import Meal
+from .models import Meal, Dish
+
+from django.db import connection
 
 
 def show_next_week_menu(request):
@@ -35,7 +37,7 @@ def show_next_week_menu(request):
 
 
 def calculate_products(request):
-    days_to_calculate = 2
+    days_to_calculate = 1
     weekdays = count_days(days_to_calculate)
 
     ingredients = (
@@ -57,6 +59,12 @@ def calculate_products(request):
         'temp_calc.html',
         context={'ingredients': total_ingredients},
     )
+
+
+def view_recipe(request, recipe_id):
+    dish = get_object_or_404(Dish, pk=recipe_id)
+    print(len(connection.queries))
+    return render(request, 'temp_recipe.html', context={'recipe': dish})
 
 
 def count_days(days_count):
