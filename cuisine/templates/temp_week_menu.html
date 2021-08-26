@@ -14,11 +14,9 @@
     </thead>
     <tbody>
       <tr>
-        {% for meal in daily_serving.values %}
-          {% for position in meal.meal_positions.all %}
-            <td><a href="{% url 'recipe' position.dish.id %}">{{position.dish}}</a></td>
-            <td><img src="{{position.dish.image.url}}" class="card-img" style="max-width: 54px;"></td>
-          {% endfor %}
+        {% for dish in daily_serving.values %}
+            <td><a href="{% url 'recipe' dish.id %}">{{dish.dish}}</a></td>
+            <td><img src="{{dish.image.url}}" class="card-img" style="max-width: 54px;"></td>
         {% endfor %}
       </tr>
     </tbody>

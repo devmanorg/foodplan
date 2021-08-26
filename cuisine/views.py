@@ -14,30 +14,31 @@ def index_page(request):
 
 
 def show_next_week_menu(request):
-    user_id = 1  #TODO get customer
     weekdays = count_days(7)
-
+    user_id = 1
     meals = (
         Meal.objects
         .filter(date__in=weekdays)
         .filter(customer=user_id)
-        .prefetch_related('meal_positions')
+        .prefetch_related('meal_positions__dish')
     )
 
-    meals_per_day = ((day, meals.filter(date=day)) for day in weekdays)
-
     serialized_meals = {}
-    for day, daily_serving in meals_per_day:
-        daily_dishes = {}
-        with suppress(Meal.DoesNotExist):
-            daily_dishes.setdefault('breakfast', daily_serving.get(meal_type='BREAKFAST'))
-            daily_dishes.setdefault('lunch', daily_serving.get(meal_type='LUNCH'))
-            daily_dishes.setdefault('dinner', daily_serving.get(meal_type='DINNER'))
-        serialized_meals.setdefault(day, daily_dishes)
+    for meal in meals:
+        positions = {}
+        for position in meal.meal_positions.all():
+            positions.setdefault('id', position.dish.id)
+            positions.setdefault('dish', position.dish.name)
+            positions.setdefault('quantity', position.quantity)
+            positions.setdefault('image', position.dish.image)
+        meal_type = {meal.get_meal_type_display(): positions}
+        serialized_meals.setdefault(meal.date, meal_type)
+        serialized_meals[meal.date].update(meal_type)
 
     return render(
-        request, 'temp_week_menu.html',
-        context={'meals': serialized_meals}
+        request,
+        'temp_week_menu.html',
+        context={'meals': serialized_meals},
     )
 
 
@@ -69,7 +70,6 @@ def calculate_products(request):
 
 def view_recipe(request, recipe_id):
     dish = get_object_or_404(Dish, pk=recipe_id)
-    print(len(connection.queries))
     return render(request, 'temp_recipe.html', context={'recipe': dish})
 
 
