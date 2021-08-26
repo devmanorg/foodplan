@@ -55,8 +55,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'global_login_required.GlobalLoginRequiredMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
+
+LOGIN_URL = 'login/'
+PUBLIC_PATHS = ['^/admin/.*', '/logout', '/login', '/register']
 
 ROOT_URLCONF = 'foodplan.urls'
 

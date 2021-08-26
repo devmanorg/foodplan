@@ -20,6 +20,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth.views import logout_then_login
 from cuisine import views
 
 urlpatterns = [
@@ -30,8 +31,9 @@ urlpatterns = [
     path('calculator/', views.calculate_products, name='calculator'),
     path('recipe/<int:recipe_id>', views.view_recipe, name='recipe'),
     path('__debug__/', include(debug_toolbar.urls)),
-    url(r'^register/$', views.register, name='register'),
-    url(r'^login/$', views.user_login, name='login'),
+    url(r'register/', views.register, name='register'),
+    url(r'login/', views.user_login, name='login'),
+    url(r'logout/', logout_then_login, name='logout'),
 ]
 
 urlpatterns.extend(static(settings.STATIC_URL, document_root=settings.STATIC_ROOT))

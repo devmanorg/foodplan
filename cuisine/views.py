@@ -3,7 +3,8 @@ import random
 
 from django.template.context_processors import csrf
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.models import User
+from django.shortcuts import render, get_object_or_404, redirect
 
 from .models import Meal, Dish, MealPosition
 from .forms import DaysForm, LoginForm
@@ -33,11 +34,10 @@ def index_page(request):
 
 def show_next_week_menu(request):
     weekdays = count_days(7)
-    user_id = 1
     meals = (
         Meal.objects
         .filter(date__in=weekdays)
-        .filter(customer=user_id)
+        .filter(customer=request.user)
         .prefetch_related('meal_positions__dish')
     )
 
@@ -113,19 +113,26 @@ def show_daily_menu(request):
 
 
 def register(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+
     if request.method == 'POST':
         user_form = UserRegistrationForm(request.POST)
         if user_form.is_valid():
             new_user = user_form.save(commit=False)
             new_user.set_password(user_form.cleaned_data['password'])
             new_user.save()
-            return render(request, 'register_done.html', {'new_user': new_user})
+
+            return redirect('index')
     else:
         user_form = UserRegistrationForm()
     return render(request, 'register.html', {'user_form': user_form})
 
 
 def user_login(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -134,7 +141,7 @@ def user_login(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    return HttpResponse('Authenticated successfully')
+                    return redirect('index')
                 else:
                     return HttpResponse('Disabled account')
             else:
