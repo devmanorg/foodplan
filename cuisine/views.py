@@ -41,8 +41,8 @@ def show_next_week_menu(request):
     weekdays = count_days(7)
     meals = (
         Meal.objects
-        .filter(date__in=weekdays)
-        .filter(customer=request.user)
+        .filter(date__in=weekdays, customer=request.user)
+        .order_by('date')
         .prefetch_related('meal_positions__dish')
     )
     print(meals)
@@ -67,12 +67,12 @@ def show_next_week_menu(request):
 
 
 def calculate_products(request):
-    days_to_calculate = int(request.POST.get('days'), 1)
+    days_to_calculate = int(request.POST.get('days', 1))
     weekdays = count_days(days_to_calculate)
 
     ingredients = (
         Meal.objects
-        .filter(date__in=weekdays)
+        .filter(date__in=weekdays, customer=request.user)
         .values_list(
             'meal_positions__dish__positions__ingredient__name',
             'meal_positions__dish__positions__quantity',
@@ -88,7 +88,7 @@ def calculate_products(request):
     return render(
         request,
         'temp_calc.html',
-        context={'ingredients': total_ingredients},
+        context={'ingredients': total_ingredients, 'start_day': weekdays[0], 'end_day': weekdays[-1]},
     )
 
 
