@@ -5,9 +5,6 @@ from pathlib import Path
 from environs import Env
 from django.urls import reverse_lazy
 
-LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
-LOGIN_URL = reverse_lazy('login')
-LOGOUT_URL = reverse_lazy('logout')
 
 env = Env()
 env.read_env()
@@ -42,14 +39,14 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['foodplanlike.pythonanywhere.com'])
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
-    'cuisine'
+    'cuisine',
+    'django.contrib.admin',
 ]
 
 MIDDLEWARE = [
@@ -137,3 +134,7 @@ INTERNAL_IPS = [
     '127.0.0.1',
     # ...
 ]
+
+LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
+LOGIN_URL = reverse_lazy('login')
+LOGOUT_URL = reverse_lazy('logout')
