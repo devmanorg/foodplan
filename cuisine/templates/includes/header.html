@@ -25,21 +25,16 @@
           </ul>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'login' %}">Войти</a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link" href="{% url 'register' %}">Регистрация</a>
-        </li><li class="nav-item">
-          <span class="user">
-        {% if request.user.is_authenticated %}
-            Hello {{ request.user.first_name }},
-            <a href="{% url "logout" %}">Logout</a>
-        {% else %}
-            <a href="{% url "login" %}">Log-in</a>
-        {% endif %}
-    </span>
         </li>
-
+         <li class="nav-link">
+          {% if request.user.is_authenticated %}
+            Добро пожаловать {{ request.user.first_name }}!
+          <a  href="{% url "logout" %}">Выйти</a>
+          {% else %}
+            <a  href="{% url "login" %}">Войти</a>
+          {% endif %}
+        </li>
       </ul>
     </div>
   </div>
