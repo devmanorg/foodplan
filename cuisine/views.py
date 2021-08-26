@@ -42,7 +42,7 @@ def show_next_week_menu(request):
 
 
 def calculate_products(request):
-    days_to_calculate = 1
+    days_to_calculate = 7
     weekdays = count_days(days_to_calculate)
 
     ingredients = (
@@ -51,13 +51,14 @@ def calculate_products(request):
         .values_list(
             'meal_positions__dish__positions__ingredient__name',
             'meal_positions__dish__positions__quantity',
+            'meal_positions__dish__positions__ingredient__units',
         )
     )
 
     total_ingredients = {}
-    for ingredient, quantity in ingredients:
-        total_ingredients.setdefault(ingredient, 0)
-        total_ingredients[ingredient] += quantity
+    for ingredient, quantity, units in ingredients:
+        total_ingredients.setdefault(ingredient, [0, units])
+        total_ingredients[ingredient][0] += quantity
 
     return render(
         request,

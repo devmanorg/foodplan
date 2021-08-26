@@ -12,7 +12,7 @@
     {% for ingredient, quantity in ingredients.items %}
       <tr>
         <td>{{ingredient}}</td>
-        <td>{{quantity}}</td>
+        <td>{{quantity.0}} {{quantity.1}}</td>
       </tr>
     {% endfor %}
   </tbody>
