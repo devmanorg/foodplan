@@ -9,29 +9,28 @@
         <li class="nav-item">
           <a class="nav-link active" aria-current="page" href="#"></a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Профиль</a>
-        </li>
+        {% if request.user.is_authenticated %}
+
+        <li class="nav-link">Добро пожаловать, {{ request.user.first_name }}!</li>
+        <li class="nav-link"></li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Меню
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="{% url 'daily_menu' %}">На сегодня</a></li>
-            <li><a class="dropdown-item" href="{% url 'week_menu' %}">На неделю</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="{% url 'calculator' %}">Список покупок</a></li>
-          </ul>
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          Меню
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <li><a class="dropdown-item" href="{% url 'daily_menu' %}">На сегодня</a></li>
+          <li><a class="dropdown-item" href="{% url 'week_menu' %}">На неделю</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="{% url 'calculator' %}">Список покупок</a></li>
+        </ul>
         </li>
-         <li class="nav-link">
-          {% if request.user.is_authenticated %}
-            Добро пожаловать, {{ request.user.first_name }}!
-          <a  href="{% url 'logout' %}">Выйти</a>
-          {% else %}
-            <a  href="{% url 'register' %}">Регистрация</a>
-            <a  href="{% url 'login' %}">Войти</a>
-          {% endif %}
-        </li>
+          <li ><a class="nav-link" href="{% url 'logout' %}">Выйти</a></li>
+        {% else %}
+
+        <li><a class="nav-link" href="{% url 'login' %}">Войти</a></li>
+        <li><a class="nav-link" href="{% url 'register' %}">Регистрация</a></li>
+
+        {% endif %}
       </ul>
     </div>
 </nav>
