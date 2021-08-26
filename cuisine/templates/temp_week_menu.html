@@ -1,12 +1,15 @@
+{% extends './layouts/base.html' %}
+
+{% block content %}
 <div class="container">
 {% for date, daily_serving in meals.items %}
   {{date}}
   <table class="table">
     <thead>
       <tr>
-       {% for meal_type in daily_serving %}
+      {% for meal_type in daily_serving %}
         <th scope="col">{{meal_type}}</th>
-       {% endfor %}
+      {% endfor %}
       </tr>
     </thead>
     <tbody>
@@ -22,3 +25,4 @@
   </table>
 {% endfor %}
 </div>
+{% endblock %}

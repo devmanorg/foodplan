@@ -1,0 +1,14 @@
+.element {
+    background-color: rgba(247, 255, 238, 0.096);
+    border-radius: 5px;
+    border: black solid 1px;
+    margin: 10px auto;
+    padding: 15px;
+    text-align: center;
+}
+.element button{
+    margin: auto;
+}
+.title{
+    font-size: large;
+}

@@ -9,6 +9,10 @@ from .models import Meal, Dish, MealPosition
 from django.db import connection
 
 
+def index_page(request):
+    return render(request, 'index.html')
+
+
 def show_next_week_menu(request):
     user_id = 1  #TODO get customer
     weekdays = count_days(7)

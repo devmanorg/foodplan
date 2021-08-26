@@ -22,6 +22,7 @@ from django.conf.urls.static import static
 from cuisine import views
 
 urlpatterns = [
+    path('', views.index_page),
     path('admin/', admin.site.urls),
     path('week_menu/', views.show_next_week_menu),
     path('daily_menu/', views.show_daily_menu),
