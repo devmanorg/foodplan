@@ -1,9 +1,11 @@
 .element {
-    background-color: rgba(247, 255, 238, 0.096);
-    border-radius: 5px;
+    background-color: #eff6df;
+    border-width: 1px;
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
     border: black solid 1px;
     margin: 10px auto;
-    padding: 15px;
+    padding: 20px 10px;
     text-align: center;
 }
 .element button{
@@ -11,4 +13,8 @@
 }
 .title{
     font-size: large;
+}
+.item img {
+    max-width: 100%;
+    height: auto;
 }

@@ -46,13 +46,14 @@ def show_next_week_menu(request):
         .filter(customer=request.user)
         .prefetch_related('meal_positions__dish')
     )
-
+    print(meals)
     serialized_meals = {}
     for meal in meals:
         positions = {}
         for position in meal.meal_positions.all():
             positions.setdefault('id', position.dish.id)
             positions.setdefault('dish', position.dish.name)
+            positions.setdefault('meal_type', position)
             positions.setdefault('quantity', position.quantity)
             positions.setdefault('image', position.dish.image)
         meal_type = {meal.get_meal_type_display(): positions}
