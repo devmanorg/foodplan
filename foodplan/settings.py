@@ -3,6 +3,11 @@ import os
 from pathlib import Path
 
 from environs import Env
+from django.urls import reverse_lazy
+
+LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
+LOGIN_URL = reverse_lazy('login')
+LOGOUT_URL = reverse_lazy('logout')
 
 env = Env()
 env.read_env()

@@ -21,6 +21,8 @@ from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 from cuisine import views
+from django.contrib.auth.views import LoginView, LogoutView
+
 
 urlpatterns = [
     path('', views.index_page, name='index'),
@@ -31,7 +33,10 @@ urlpatterns = [
     path('recipe/<int:recipe_id>', views.view_recipe, name='recipe'),
     path('__debug__/', include(debug_toolbar.urls)),
     url(r'^register/$', views.register, name='register'),
-    url(r'^login/$', views.user_login, name='login'),
+    # url(r'^login/$', views.user_login, name='login'),
+    url(r'^login/$', LoginView.as_view(template_name='registration/login.html'), name='login'),
+    url(r'^logout/$', LogoutView.as_view(template_name='registration/logged_out.html'), name='logout'),
+    url(r'^$', views.dashboard, name='dashboard'),
 ]
 
 urlpatterns.extend(static(settings.STATIC_URL, document_root=settings.STATIC_ROOT))

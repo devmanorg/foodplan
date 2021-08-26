@@ -11,6 +11,12 @@ from .forms import DaysForm, LoginForm
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from .forms import UserRegistrationForm
+from django.contrib.auth.decorators import login_required
+
+
+@login_required
+def dashboard(request):
+    return render(request, 'dashboard.html', {'section': 'dashboard'})
 
 
 def get_days(request):
