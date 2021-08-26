@@ -11,6 +11,9 @@
         <th>Картинка</th>
         <th>Время готовки</th>
         <th>Ингредиенты</th>
+        <th>Рецепт</th>
+
+
       </tr>
 
       <tr>
@@ -22,6 +25,7 @@
             {{ position.ingredient }} - {{ position.quantity }} {{ position.ingredient.units }}
           {% endfor %}
         </td>
+      <td>{{ recipe.recipe }}</td>
       </tr>
 
   </div>
