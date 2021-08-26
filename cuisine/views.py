@@ -1,12 +1,26 @@
 import datetime
 import random
 
+from django.template.context_processors import csrf
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from contextlib import suppress
 
 from .models import Meal, Dish, MealPosition
+from .forms import DaysForm
 
-from django.db import connection
+
+def get_days(request):
+    if request.method == 'POST':
+        form = DaysForm(request.POST)
+        if form.is_valid():
+            return HttpResponseRedirect('calculator')
+    else:
+        form = DaysForm()
+
+    context = {'form': form}
+    context.update(csrf(request))
+
+    return render(request, 'name.html', context=context)
 
 
 def index_page(request):
@@ -43,7 +57,7 @@ def show_next_week_menu(request):
 
 
 def calculate_products(request):
-    days_to_calculate = 7
+    days_to_calculate = int(request.POST.get('days'), 1)
     weekdays = count_days(days_to_calculate)
 
     ingredients = (

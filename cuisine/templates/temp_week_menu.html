@@ -23,4 +23,11 @@
   </table>
 {% endfor %}
 </div>
+
+<form action="/calculator/" method="post">
+  {% csrf_token %}
+    <label for="days">Введите количество дней, чтобы расчитать общее число покупок</label>
+    <input id="days" type="text" name="days" value="{{ days_to_calculate }}">
+    <input type="submit" value="OK">
+</form>
 {% endblock %}
