@@ -28,6 +28,7 @@
             Добро пожаловать, {{ request.user.first_name }}!
           <a  href="{% url 'logout' %}">Выйти</a>
           {% else %}
+            <a  href="{% url 'register' %}">Регистрация</a>
             <a  href="{% url 'login' %}">Войти</a>
           {% endif %}
         </li>
