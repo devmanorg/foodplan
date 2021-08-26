@@ -1,0 +1,29 @@
+  <div class="container">
+    <center>
+      <h2>Меню на день</h2>
+    </center>
+
+    <hr/>
+    <table class="table table-responsive">
+
+      <tr>
+        <th>Завтрак</th>
+        <th>Обед</th>
+        <th>Ужин</th>
+      </tr>
+      <tr>
+        <th>{{ breakfast }}
+            <br>
+            <img src="{{ breakfast.dish.image.url }}" style="max-width: 100">
+        </th>
+        <th>{{ launch }}
+            <br>
+            <img src="{{ launch.dish.image.url }}" style="max-width: 100">
+        </th>
+          <th>{{ dinner }}
+            <br>
+            <img src="{{ dinner.dish.image.url }}" style="max-width: 100">
+        </th>
+      </tr>
+    </table>
+  </div>

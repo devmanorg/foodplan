@@ -1,9 +1,10 @@
 import datetime
+import random
 
 from django.shortcuts import render, get_object_or_404
 from contextlib import suppress
 
-from .models import Meal, Dish
+from .models import Meal, Dish, MealPosition
 
 from django.db import connection
 
@@ -72,3 +73,17 @@ def count_days(days_count):
         datetime.date.today() + datetime.timedelta(days=day)
         for day in range(1, days_count + 1)
     ]
+
+
+def show_daily_menu(request):
+    random_breakfast = random.choice(MealPosition.objects. \
+                                     filter(meal__meal_type='BREAKFAST'))
+    random_launch = random.choice(MealPosition.objects. \
+                                  filter(meal__meal_type='LUNCH'))
+    random_dinner = random.choice(MealPosition.objects. \
+                                  filter(meal__meal_type='DINNER'))
+    context = {'breakfast': random_breakfast,
+               'launch': random_launch,
+               'dinner': random_dinner
+               }
+    return render(request, 'daily_menu.html', context=context)
