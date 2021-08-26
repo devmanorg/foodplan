@@ -12,6 +12,12 @@ from .forms import DaysForm, LoginForm
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from .forms import UserRegistrationForm
+from django.contrib.auth.decorators import login_required
+
+
+@login_required
+def dashboard(request):
+    return render(request, 'dashboard.html', {'section': 'dashboard'})
 
 
 def get_days(request):
@@ -148,4 +154,4 @@ def user_login(request):
                 return HttpResponse('Invalid login')
     else:
         form = LoginForm()
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'registration/login.html', {'form': form})
