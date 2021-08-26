@@ -100,7 +100,7 @@ def view_recipe(request, recipe_id):
 def count_days(days_count):
     return [
         datetime.date.today() + datetime.timedelta(days=day)
-        for day in range(1, days_count + 1)
+        for day in range(days_count)
     ]
 
 
