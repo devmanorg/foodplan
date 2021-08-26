@@ -105,16 +105,8 @@ def count_days(days_count):
 
 
 def show_daily_menu(request):
-    random_breakfast = random.choice(MealPosition.objects. \
-                                     filter(meal__meal_type='BREAKFAST'))
-    random_launch = random.choice(MealPosition.objects. \
-                                  filter(meal__meal_type='LUNCH'))
-    random_dinner = random.choice(MealPosition.objects. \
-                                  filter(meal__meal_type='DINNER'))
-    context = {'breakfast': random_breakfast,
-               'launch': random_launch,
-               'dinner': random_dinner
-               }
+    items = MealPosition.objects.filter(meal__date=datetime.date.today(), meal__customer=request.user).all()
+    context = {item.meal.meal_type.lower(): item for item in items}
     return render(request, 'daily_menu.html', context=context)
 
 
