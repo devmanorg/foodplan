@@ -20,7 +20,6 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib.auth.views import logout_then_login
 from cuisine import views
 from django.contrib.auth.views import LoginView, LogoutView
 
@@ -33,6 +32,7 @@ urlpatterns = [
     path('calculator/', views.calculate_products, name='calculator'),
     path('recipe/<int:recipe_id>', views.view_recipe, name='recipe'),
     path('__debug__/', include(debug_toolbar.urls)),
+    path('generate_menu/', views.generate_menu, name='generate_menu'),
     url(r'^register/$', views.register, name='register'),
     url(r'^login/$', LoginView.as_view(template_name='registration/login.html'), name='login'),
     url(r'^logout/$', LogoutView.as_view(template_name='registration/logged_out.html'), name='logout'),

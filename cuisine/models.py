@@ -124,7 +124,7 @@ class Meal(models.Model):
         verbose_name_plural = 'приемы пищи'
 
     def __str__(self):
-        return f'{self.get_meal_type_display().title()} {self.date}'
+        return f'{self.get_meal_type_display().title()} {self.date} {self.customer.username}'
 
 
 class MealPosition(models.Model):

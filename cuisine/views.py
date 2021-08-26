@@ -3,7 +3,6 @@ import random
 
 from django.template.context_processors import csrf
 from django.http import HttpResponseRedirect
-from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 
 from .models import Meal, Dish, MealPosition
@@ -12,10 +11,9 @@ from .forms import DaysForm, LoginForm
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from .forms import UserRegistrationForm
-from django.contrib.auth.decorators import login_required
+from .services import generate_menu_randomly, has_meals
 
 
-@login_required
 def dashboard(request):
     return render(request, 'dashboard.html', {'section': 'dashboard'})
 
@@ -35,7 +33,8 @@ def get_days(request):
 
 
 def index_page(request):
-    return render(request, 'index.html')
+    context = {'has_meals': has_meals(user=request.user, current_date=datetime.date.today())}
+    return render(request, 'index.html', context)
 
 
 def show_next_week_menu(request):
@@ -155,3 +154,11 @@ def user_login(request):
     else:
         form = LoginForm()
     return render(request, 'registration/login.html', {'form': form})
+
+
+def generate_menu(request):
+    is_generated = generate_menu_randomly(user=request.user, current_dt=datetime.datetime.now())
+    if is_generated:
+        return redirect('week_menu')
+    else:
+        return redirect('index')
