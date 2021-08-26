@@ -18,10 +18,10 @@
             Меню
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="#">На сегодня</a></li>
-            <li><a class="dropdown-item" href="#">На неделю</a></li>
+            <li><a class="dropdown-item" href="{% url 'daily_menu' %}">На сегодня</a></li>
+            <li><a class="dropdown-item" href="{% url 'week_menu' %}">На неделю</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Список покупок</a></li>
+            <li><a class="dropdown-item" href="{% url 'calculator' %}">Список покупок</a></li>
           </ul>
         </li>
         <li class="nav-item">
