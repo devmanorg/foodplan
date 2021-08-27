@@ -1,5 +1,4 @@
 import datetime
-import random
 
 from django.template.context_processors import csrf
 from django.http import HttpResponseRedirect
@@ -67,6 +66,7 @@ def show_next_week_menu(request):
 
 
 def calculate_products(request):
+    form = DaysForm()
     days_to_calculate = int(request.POST.get('days', 0))
     weekdays = count_days(days_to_calculate)
 
@@ -86,7 +86,7 @@ def calculate_products(request):
         total_ingredients[ingredient][0] += quantity
 
     context = {
-        'ingredients': total_ingredients,
+        'ingredients': total_ingredients, 'form': form
     }
     if weekdays:
         context['start_day'] = weekdays[0]

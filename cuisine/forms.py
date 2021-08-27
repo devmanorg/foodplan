@@ -3,7 +3,10 @@ from django.contrib.auth.models import User
 
 
 class DaysForm(forms.Form):
-    days = forms.IntegerField(label='days')
+    days = forms.ChoiceField(
+        label='days',
+        choices=tuple(zip(range(1, 8), (range(1, 8)))),
+    )
 
 
 class UserRegistrationForm(forms.ModelForm):
