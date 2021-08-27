@@ -41,11 +41,11 @@ def show_next_week_menu(request):
     weekdays = count_days(7)
     meals = (
         Meal.objects
+        .select_related('customer')
         .filter(date__in=weekdays, customer=request.user)
         .order_by('date')
         .prefetch_related('meal_positions__dish')
     )
-    print(meals)
     serialized_meals = {}
     for meal in meals:
         positions = {}
@@ -105,8 +105,8 @@ def count_days(days_count):
 
 
 def show_daily_menu(request):
-    items = MealPosition.objects.filter(meal__date=datetime.date.today(), meal__customer=request.user).all()
-    context = {item.meal.meal_type.lower(): item for item in items}
+    items = MealPosition.objects.filter(meal__date=datetime.date.today(), meal__customer=request.user)
+    context = {item.meal.meal_type.lower(): (item, item.dish.id) for item in items}
     return render(request, 'daily_menu.html', context=context)
 
 
