@@ -14,7 +14,8 @@
 .title{
     font-size: large;
 }
-.item img {
-    max-width: 100%;
+.card-img {
+    max-width: 250px;
+    max-height: 250px;
     height: auto;
 }
