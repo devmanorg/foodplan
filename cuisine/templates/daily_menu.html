@@ -17,17 +17,17 @@
     <th>
       <a href="{% url 'recipe' breakfast.1 %}">{{ breakfast.0 }}</a>
         <br>
-        <img src="{{ breakfast.0.dish.image.url }}" style="max-width: 100">
+        <img src="{{ breakfast.0.dish.image.url }}" class="card-img" style="max-width: 100;">
     </th>
     <th>
       <a href="{% url 'recipe' lunch.1 %}">{{ lunch.0 }}</a>
         <br>
-        <img src="{{ lunch.0.dish.image.url }}" style="max-width: 100">
+        <img src="{{ lunch.0.dish.image.url }}" class="card-img" style="max-width: 100">
     </th>
       <th>
         <a href="{% url 'recipe' dinner.1 %}">{{ dinner.0 }}</a>
         <br>
-        <img src="{{ dinner.0.dish.image.url }}" style="max-width: 100">
+        <img src="{{ dinner.0.dish.image.url }}" class="card-img" style="max-width: 100">
     </th>
   </tr>
 </table>

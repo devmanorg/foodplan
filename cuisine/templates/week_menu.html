@@ -33,7 +33,7 @@
       <tr>
         {% for dish in daily_serving.values %}
             <td>
-            <a href="{% url 'recipe' dish.id %}">{{dish.dish}}</a>
+            <a href="{% url 'recipe' dish.id %}">{{dish.dish}}</a><br>
             <img src="{{dish.image.url}}" class="card-img" style="max-width: 54px;">
             </td>
         {% endfor %}
