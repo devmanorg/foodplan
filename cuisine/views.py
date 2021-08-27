@@ -61,13 +61,13 @@ def show_next_week_menu(request):
 
     return render(
         request,
-        'temp_week_menu.html',
+        'week_menu.html',
         context={'meals': serialized_meals},
     )
 
 
 def calculate_products(request):
-    days_to_calculate = int(request.POST.get('days', 1))
+    days_to_calculate = int(request.POST.get('days', 0))
     weekdays = count_days(days_to_calculate)
 
     ingredients = (
@@ -85,16 +85,23 @@ def calculate_products(request):
         total_ingredients.setdefault(ingredient, [0, units])
         total_ingredients[ingredient][0] += quantity
 
+    context = {
+        'ingredients': total_ingredients,
+    }
+    if weekdays:
+        context['start_day'] = weekdays[0]
+        context['end_day'] = weekdays[-1]
+
     return render(
         request,
-        'temp_calc.html',
-        context={'ingredients': total_ingredients, 'start_day': weekdays[0], 'end_day': weekdays[-1]},
+        'calculator.html',
+        context=context,
     )
 
 
 def view_recipe(request, recipe_id):
     dish = get_object_or_404(Dish, pk=recipe_id)
-    return render(request, 'temp_recipe.html', context={'recipe': dish})
+    return render(request, 'recipe.html', context={'recipe': dish})
 
 
 def count_days(days_count):
@@ -105,7 +112,11 @@ def count_days(days_count):
 
 
 def show_daily_menu(request):
-    items = MealPosition.objects.filter(meal__date=datetime.date.today(), meal__customer=request.user)
+    items = (
+        MealPosition.objects
+        .filter(meal__date=datetime.date.today(), meal__customer=request.user)
+        .select_related('dish', 'meal')
+    )
     context = {item.meal.meal_type.lower(): (item, item.dish.id) for item in items}
     return render(request, 'daily_menu.html', context=context)
 
