@@ -1,4 +1,4 @@
-{% extends './layouts/base.html' %}
+{% extends 'pure_bootstrap/layouts/base.html' %}
 
 {% block content %}
 <form method="post">
@@ -20,6 +20,7 @@
     <tr>
       <th scope="col">Ингредиент</th>
       <th scope="col">Количество</th>
+      <th scope="col">Цена за шт / кг / л</th>
     </tr>
   </thead>
   <tbody>
@@ -27,9 +28,11 @@
       <tr>
         <td>{{ingredient}}</td>
         <td>{{quantity.0}} {{quantity.1}}</td>
+        <td>{{quantity.2}} р.</td>
       </tr>
     {% endfor %}
   </tbody>
 </table>
+<h1 align="center">Итоговая сумма:  {{total_sum}} рублей</h1>
 {% endif %}
 {% endblock %}

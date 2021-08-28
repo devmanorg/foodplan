@@ -29,4 +29,9 @@ class Migration(migrations.Migration):
             name='quantity',
             field=models.FloatField(verbose_name='число'),
         ),
+        migrations.AddField(
+            model_name='ingredient',
+            name='price',
+            field=models.DecimalField(blank=True, decimal_places=2, max_digits=6, null=True, verbose_name='цена за кг/л/шт'),
+        ),
     ]
