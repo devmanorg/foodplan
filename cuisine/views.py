@@ -77,16 +77,24 @@ def calculate_products(request):
             'meal_positions__dish__positions__ingredient__name',
             'meal_positions__dish__positions__quantity',
             'meal_positions__dish__positions__ingredient__units',
+            'meal_positions__dish__positions__ingredient__price',
         )
     )
 
     total_ingredients = {}
-    for ingredient, quantity, units in ingredients:
-        total_ingredients.setdefault(ingredient, [0, units])
+    total_sum = 0
+    for ingredient, quantity, units, price in ingredients:
+        total_ingredients.setdefault(ingredient, [0, units, 0])
         total_ingredients[ingredient][0] += quantity
+        total_ingredients[ingredient][2] += price
+        if units == 'шт':
+            total_sum += quantity * price
+        elif units == 'г' or units == 'л':
+            total_sum += quantity * price / 1000
 
     context = {
-        'ingredients': total_ingredients, 'form': form
+        'ingredients': total_ingredients, 'form': form,
+        'total_sum': total_sum
     }
     if weekdays:
         context['start_day'] = weekdays[0]

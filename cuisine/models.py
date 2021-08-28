@@ -58,6 +58,13 @@ class Ingredient(models.Model):
         'единицы измерения',
         max_length=20,
     )
+    price = models.DecimalField(
+        'цена за кг/л/шт',
+        max_digits=6,
+        decimal_places=2,
+        blank=True,
+        null=True
+    )
 
     class Meta:
         verbose_name = 'ингредиент'

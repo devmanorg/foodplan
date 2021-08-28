@@ -20,6 +20,7 @@
     <tr>
       <th scope="col">Ингредиент</th>
       <th scope="col">Количество</th>
+      <th scope="col">Цена</th>
     </tr>
   </thead>
   <tbody>
@@ -27,9 +28,11 @@
       <tr>
         <td>{{ingredient}}</td>
         <td>{{quantity.0}} {{quantity.1}}</td>
+        <td>{{quantity.2}}</td>
       </tr>
     {% endfor %}
   </tbody>
 </table>
+<h1 align="center">Итоговая сумма:  {{total_sum}}</h1>
 {% endif %}
 {% endblock %}
