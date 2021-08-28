@@ -55,12 +55,6 @@ class Ingredient(models.Model):
         'название',
         max_length=50,
     )
-    units = models.CharField(
-        'единицы измерения',
-        max_length=20,
-        blank=True,
-        null=True,
-    )
 
     class Meta:
         verbose_name = 'ингредиент'
@@ -79,6 +73,12 @@ class IngredientPosition(models.Model):
     )
     quantity = models.FloatField(
         'число',
+    )
+    units = models.CharField(
+        'единицы измерения',
+        max_length=20,
+        blank=True,
+        null=True,
     )
 
     dish = models.ForeignKey(

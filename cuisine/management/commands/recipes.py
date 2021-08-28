@@ -30,14 +30,6 @@ def parse_recipe(url):
     except AttributeError:
         return None
 
-    units_factor = {
-        'стол': 20,
-        'чай': 10,
-        'стакан': 200,
-        'по вкусу': 0,
-        'кг': 1000,
-    }
-
     name = soup.h1.text.replace('\xa0', ' ')
     tags = list(soup.find(class_='css-a90bfp').stripped_strings)
 
@@ -47,30 +39,8 @@ def parse_recipe(url):
     portions = portion_and_time[1]
     cooking_time = portion_and_time[-1]
 
-    quantities = []
-    for layout in soup.find_all(class_='css-1t5teuh-Info'):
-        quantity = 0
-        quantity_with_units = layout.text
-        units = quantity_with_units
-        digits = list(filter(str.isdigit, quantity_with_units))
-        if digits:
-            quantity = int(''.join(digits))
-            units = quantity_with_units.replace(str(quantity), '').strip()
-
-            if '/' in quantity_with_units:
-                quantity = int(digits[0]) / int(''.join(digits[1:]))
-                units = quantity_with_units.replace('/'.join(digits), '').strip()
-            elif '.' in quantity_with_units:
-                quantity = int('.'.join(digits[1:]))
-                units = quantity_with_units.replace(quantity, '').strip()
-        
-        for unit in units_factor:
-            if unit in units:
-                quantity *= units_factor[unit]
-                units = ''
-                break
-        quantity /= int(portions)
-        quantities.append((quantity, units))
+    quantity_soup = soup.find_all(class_='css-1t5teuh-Info')
+    quantities = parse_quantity_and_units(quantity_soup, portions)
 
     ingredients_and_quantity = dict(zip(ingredients, quantities))
 
@@ -88,6 +58,44 @@ def parse_recipe(url):
     return dish_recipe
 
 
+def parse_quantity_and_units(soup, portions):
+    quantities = []
+    for layout in soup:
+        quantity = 0
+        quantity_with_units = layout.text
+        units = ''.join(char for char in quantity_with_units if not char.isdigit()).strip()
+
+        if '/' in quantity_with_units:
+            fractions = {'1/2': 0.5, '1/4': 0.25}
+            units = units.replace('/', '')
+            quantity_string = quantity_with_units.replace(units, '').strip()
+            digits = quantity_string.split(' ')[0]
+
+            for fraction in fractions:
+                if fraction == digits:
+                    quantity = fractions[digits]
+                elif fraction in digits:
+                    integer = digits.replace(fraction, '')
+                    integer = int(integer)
+                    quantity = integer + fractions[fraction]
+                    break
+
+        elif ',' in quantity_with_units:
+            units = units.strip(',')
+            quantity = float(quantity_with_units.replace(units, '').replace(',', '.'))
+        elif '.' in quantity_with_units:
+            units = units.strip('.')
+            quantity = float(quantity_with_units.replace(units, ''))
+        elif units == quantity_with_units:
+            quantity = 0
+        else:
+            quantity = float(quantity_with_units.replace(units, '').strip())
+
+        quantity /= int(portions)
+        quantities.append((f'{quantity:.3f}', units))
+    return quantities
+
+
 @transaction.atomic
 def record_recipe(recipe):
     dish, created = Dish.objects.get_or_create(name=recipe['name'])
@@ -100,18 +108,21 @@ def record_recipe(recipe):
     tags = [Tag.objects.get_or_create(name=tag)[0] for tag in recipe['tags']]
     dish.tags.add(*tags)
 
+    positions = []
     for ingredient, quantity_with_units in recipe['ingredients_and_quantity'].items():
         quantity, units = quantity_with_units
 
         ingredient_model, created = Ingredient.objects.get_or_create(name=ingredient)
-        if created and units:
-            ingredient_model.units = str(units)
-        ingredient_model.save()
 
-        position = IngredientPosition.objects.get_or_create(
-            ingredient=ingredient_model, quantity=int(quantity), dish=dish,
+        position = IngredientPosition(
+            ingredient=ingredient_model,
+            quantity=quantity,
+            dish=dish,
+            units=units,
         )
+        positions.append(position)
 
+    IngredientPosition.objects.bulk_create(positions)
     download_image(recipe['image'], dish)
 
 
@@ -137,13 +148,10 @@ def fill_recipes_json():
         url = f'https://eda.ru/recepty/supy/sirnij-sup-po-francuzski-s-kuricej-{number}'
         if recipe := parse_recipe(url):
             recipes.append(recipe)
-            # print(recipe)
-
     return recipes
 
 
 def get_recipes_json_file(recipes):
-    print(recipes)
     with open('recipes.json', 'w', encoding='utf-8') as file:
         json.dump(recipes, file, ensure_ascii=False, indent=4)
 
@@ -173,13 +181,10 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        print(options)
         if options.get('parse'):
             recipes = fill_recipes_json()
-            # print(recipes)
             get_recipes_json_file(recipes)
         elif options['create']:
             recipes = read_json()
             for recipe in recipes:
                 record_recipe(recipe)
-
