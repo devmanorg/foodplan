@@ -10,7 +10,6 @@
 <div class="row">
   {% for dish in daily_serving.values %}
   <div class="item p-2 m-2 col">
-  <a href="{% url 'recipe' dish.id %}">
     <img src="{{dish.image.url}}"  class="card-img" style="max-width: 300px;" alt="блюдо">
     {% comment %}<p class="h6">{{daily_serving}}</p>{% endcomment %}
     <p class=" h4 p-1">{{dish.dish}}</p>
@@ -19,29 +18,3 @@
   {% endfor %}
 </div>
 {% endfor %}
-
-{% comment %}
-{% for date, daily_serving in meals.items %}
-  <h2>Меню на {{date}}</h2>
-  <table class="table">
-    <thead>
-      <tr>
-      {% for meal_type in daily_serving %}
-        <th scope="col">{{meal_type}}</th>
-      {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        {% for dish in daily_serving.values %}
-            <td>
-            <a href="{% url 'recipe' dish.id %}">{{dish.dish}}</a><br>
-            <img src="{{dish.image.url}}" class="card-img" style="max-width: 54px;">
-            </td>
-        {% endfor %}
-      </tr>
-    </tbody>
-  </table>
-{% endfor %}
-{% endcomment %}
-{% endblock %}
