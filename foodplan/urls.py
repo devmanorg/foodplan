@@ -13,6 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
+
 import debug_toolbar
 from django.conf.urls import url
 
@@ -20,8 +22,12 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
-from cuisine import views
 from django.contrib.auth.views import LoginView, LogoutView
+
+TEMPLATE = os.getenv('TEMPLATE', 'pure_bootstrap')
+
+if TEMPLATE == 'pure_bootstrap':
+    from cuisine.views import pure_bootstrap as views
 
 
 urlpatterns = [
@@ -34,8 +40,8 @@ urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
     path('generate_menu/', views.generate_menu, name='generate_menu'),
     url(r'^register/$', views.register, name='register'),
-    url(r'^login/$', LoginView.as_view(template_name='registration/login.html'), name='login'),
-    url(r'^logout/$', LogoutView.as_view(template_name='registration/logged_out.html'), name='logout'),
+    url(r'^login/$', LoginView.as_view(template_name=f'{TEMPLATE}registration/login.html'), name='login'),
+    url(r'^logout/$', LogoutView.as_view(template_name=f'{TEMPLATE}registration/logged_out.html'), name='logout'),
     url(r'^$', views.dashboard, name='dashboard'),
 ]
 

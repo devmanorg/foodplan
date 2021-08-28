@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from django.template.context_processors import csrf
 from django.http import HttpResponseRedirect
@@ -11,6 +12,9 @@ from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from .forms import UserRegistrationForm
 from .services import generate_menu_randomly, has_meals
+
+
+TEMPLATE = os.getenv('TEMPLATE', 'pure_bootstrap')
 
 
 def dashboard(request):
@@ -28,12 +32,12 @@ def get_days(request):
     context = {'form': form}
     context.update(csrf(request))
 
-    return render(request, 'name.html', context=context)
+    return render(request, f'{TEMPLATE}/name.html', context=context)
 
 
 def index_page(request):
     context = {'has_meals': has_meals(user=request.user, current_date=datetime.date.today())}
-    return render(request, 'index.html', context)
+    return render(request, f'{TEMPLATE}/index.html', context)
 
 
 def show_next_week_menu(request):
@@ -58,11 +62,7 @@ def show_next_week_menu(request):
         serialized_meals.setdefault(meal.date, meal_type)
         serialized_meals[meal.date].update(meal_type)
 
-    return render(
-        request,
-        'week_menu.html',
-        context={'meals': serialized_meals},
-    )
+    return render(request, f'{TEMPLATE}/week_menu.html', context={'meals': serialized_meals})
 
 
 def calculate_products(request):
@@ -101,16 +101,12 @@ def calculate_products(request):
         context['start_day'] = weekdays[0]
         context['end_day'] = weekdays[-1]
 
-    return render(
-        request,
-        'calculator.html',
-        context=context,
-    )
+    return render(request, f'{TEMPLATE}/calculator.html', context)
 
 
 def view_recipe(request, recipe_id):
     dish = get_object_or_404(Dish, pk=recipe_id)
-    return render(request, 'recipe.html', context={'recipe': dish})
+    return render(request, f'{TEMPLATE}/recipe.html', context={'recipe': dish})
 
 
 def count_days(days_count):
@@ -127,7 +123,7 @@ def show_daily_menu(request):
         .select_related('dish', 'meal')
     )
     context = {item.meal.meal_type.lower(): (item, item.dish.id) for item in items}
-    return render(request, 'daily_menu.html', context=context)
+    return render(request, f'{TEMPLATE}/daily_menu.html', context=context)
 
 
 def register(request):
@@ -140,7 +136,7 @@ def register(request):
             return render(request, 'register_done.html', {'new_user': new_user})
     else:
         user_form = UserRegistrationForm()
-    return render(request, 'register.html', {'user_form': user_form})
+    return render(request, f'{TEMPLATE}/register.html', {'user_form': user_form})
 
 
 def user_login(request):
@@ -162,7 +158,7 @@ def user_login(request):
                 return HttpResponse('Invalid login')
     else:
         form = LoginForm()
-    return render(request, 'registration/login.html', {'form': form})
+    return render(request, f'{TEMPLATE}/registration/login.html', {'form': form})
 
 
 def generate_menu(request):
