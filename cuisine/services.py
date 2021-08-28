@@ -9,10 +9,10 @@ from cuisine.models import MealPosition, Dish, Meal
 logger = logging.getLogger(__name__)
 
 
-_MEAL_TYPE_TO_TAG = {
-    'BREAKFAST': 'завтрак',
-    'LUNCH': 'обед',
-    'DINNER': 'ужин',
+_MEAL_TYPE_TO_TAGS = {
+    'BREAKFAST': ['Завтраки', 'Выпечка и десерты', 'Сэндвичи'],
+    'LUNCH': ['Супы', 'Бульоны', 'Основные блюда'],
+    'DINNER': ['Основные блюда', 'Салаты', 'Паста и пицца'],
 }
 
 
@@ -55,10 +55,10 @@ def generate_meal_randomly(date: datetime.date, user: User, meal_type: str):
     meal = Meal.objects.create(meal_type=meal_type, date=date, customer=user)
     meal.save()
 
-    tag = _MEAL_TYPE_TO_TAG[meal_type]
+    tags = _MEAL_TYPE_TO_TAGS[meal_type]
     dishes = []
     for dish in Dish.objects.all():
-        if dish.tags.filter(name=tag).exists():
+        if dish.tags.filter(name__in=tags).exists():
             dishes.append(dish)
 
     meal_position = MealPosition.objects.create(meal=meal, dish=random.choice(dishes), quantity=1)
