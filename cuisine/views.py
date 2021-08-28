@@ -94,7 +94,7 @@ def calculate_products(request):
 
     context = {
         'ingredients': total_ingredients, 'form': form,
-        'total_sum': total_sum
+        'total_sum': round(total_sum)
     }
     if weekdays:
         context['start_day'] = weekdays[0]
