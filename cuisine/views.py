@@ -86,7 +86,8 @@ def calculate_products(request):
     for ingredient, quantity, units, price in ingredients:
         total_ingredients.setdefault(ingredient, [0, units, 0])
         total_ingredients[ingredient][0] += quantity
-        total_ingredients[ingredient][2] += price
+        if total_ingredients[ingredient][2] == 0:
+            total_ingredients[ingredient][2] += price
         if units == 'шт':
             total_sum += quantity * price
         elif units == 'г' or units == 'л':
