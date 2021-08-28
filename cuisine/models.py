@@ -12,10 +12,11 @@ class Dish(models.Model):
         'рецепт',
         max_length=2000,
     )
-    cooking_time = models.PositiveSmallIntegerField(
+    cooking_time = models.CharField(
         'время готовки',
         blank=True,
         null=True,
+        max_length=20,
     )
     image = models.ImageField(
         'изображение',
@@ -57,6 +58,8 @@ class Ingredient(models.Model):
     units = models.CharField(
         'единицы измерения',
         max_length=20,
+        blank=True,
+        null=True,
     )
 
     class Meta:
@@ -74,9 +77,8 @@ class IngredientPosition(models.Model):
         related_name='positions',
         on_delete=models.CASCADE,
     )
-    quantity = models.PositiveSmallIntegerField(
+    quantity = models.FloatField(
         'число',
-        validators=[MinValueValidator(1)],
     )
 
     dish = models.ForeignKey(
