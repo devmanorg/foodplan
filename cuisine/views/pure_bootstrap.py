@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 
 from cuisine.models import Meal, Dish, MealPosition
-from cuisine.forms import DaysForm, LoginForm
+from cuisine.forms import DaysForm, LoginForm, DashboardForm
 
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
@@ -19,7 +19,20 @@ TEMPLATE = os.getenv('TEMPLATE', 'pure_bootstrap')
 
 
 def dashboard(request):
-    return render(request, 'dashboard.html', {'section': 'dashboard'})
+    if request.method == 'POST':
+        form = DashboardForm(request.POST)
+        if form.is_valid():
+            print(form.data)
+            return HttpResponseRedirect('dashboard')
+    else:
+        form = DashboardForm()
+    context = {
+        'section': 'dashboard',
+        'form': form,
+    }
+    context = {'form': form}
+    context.update(csrf(request))
+    return render(request, f'{TEMPLATE}/dashboard.html', context=context)
 
 
 def get_days(request):
@@ -99,14 +112,26 @@ def calculate_products(request):
     total_ingredients = {}
     total_sum = 0
     for ingredient, quantity, units, price in ingredients:
+        if price is None:
+            price = 0
+        # ingredient_info = {
+        #     'quantity': quantity,
+        #     'units': units,
+        #     'total_price': 0,
+        # }
         total_ingredients.setdefault(ingredient, [0, units, 0])
-        total_ingredients[ingredient][0] += quantity
-        if total_ingredients[ingredient][2] == 0:
-            total_ingredients[ingredient][2] += price
-        if units == 'шт':
-            total_sum += quantity * price
-        elif units == 'г' or units == 'л':
-            total_sum += quantity * price / 1000
+        # total_ingredient_price = ingredient['quantity'] * ingredient['price']
+        # if units == 'г' or units == 'мл':
+        #     total_ingredient_price /= 1000
+        # ingredient['quantity'] += ingredient_info['quantity']
+        # ingredient['total_price'] += total_ingredient_price
+
+        total_ingredients[ingredient][0] += float(f'{quantity:.2f}')
+        ingredient_price = quantity * int(price)
+        if units == 'г' or units == 'мл':
+            ingredient_price = quantity * int(price) / 1000
+        total_ingredients[ingredient][2] += float(f'{ingredient_price:.2f}')
+        total_sum += ingredient_price
 
     context = {
         'ingredients': total_ingredients, 'form': form,

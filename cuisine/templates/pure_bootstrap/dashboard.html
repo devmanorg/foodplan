@@ -3,6 +3,27 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-    <h1>Dashboard</h1>
-    <p>Welcome to your dashboard.</p>
+<form method="post" action="{% url 'dashboard' %}">{% csrf_token %}
+    <div class="dropdown" id="dropdown">
+        {{form.persons}}
+        <div class="options">
+            {% for meal in form.meals_to_skip %}
+                    {{meal}}
+            {% endfor %}
+        </div>
+    </div>
+    <p><input type="submit" value="Отправить"></p>
+</form>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Количесто персон</th>
+      <th scope="col">Пропускаемые приемы пищи</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr></tr>
+  </tbody>
+</table>
+
 {% endblock %}

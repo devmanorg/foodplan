@@ -42,7 +42,7 @@ urlpatterns = [
     url(r'^register/$', views.register, name='register'),
     url(r'^login/$', LoginView.as_view(template_name=f'{TEMPLATE}/registration/login.html'), name='login'),
     url(r'^logout/$', LogoutView.as_view(template_name=f'{TEMPLATE}/registration/logged_out.html'), name='logout'),
-    url(r'^$', views.dashboard, name='dashboard'),
+    url(r'^dashboard$', views.dashboard, name='dashboard'),
 ]
 
 urlpatterns.extend(static(settings.STATIC_URL, document_root=settings.STATIC_ROOT))
