@@ -1,11 +1,48 @@
 {% extends 'pure_bootstrap/layouts/base.html' %}
 
 {% block content %}
+    {%  if not request.user.is_authenticated %}
     {% comment %}
          TODO: Сделать корректную главную страницу с: 
             Определением, залогинен человек или нет,
             кнопками регистрации
     {% endcomment %}
+    <center>
+  <h2>Случайное меню</h2>
+</center>
+
+<hr/>
+<table class="table table-responsive">
+  <tr>
+    <th>Завтрак</th>
+    <th>Обед</th>
+    <th>Ужин</th>
+  </tr>
+  <tr>
+    <th>
+      <a href="{% url 'recipe' breakfast.id %}">{{ breakfast }}</a>
+        <br>
+        <br>
+        <img src="{{ breakfast.image.url }}" class="card-img" style="max-width: 100;">
+    </th>
+    <th>
+      <a href="{% url 'recipe' lunch.id %}">{{ lunch }}</a>
+        <br>
+        <br>
+        <img src="{{ lunch.image.url }}" class="card-img" style="max-width: 100">
+    </th>
+    <th>
+        <a href="{% url 'recipe' dinner.id %}">{{ dinner }}</a>
+        <br>
+        <br>
+        <img src="{{ dinner.image.url }}" class="card-img" style="max-width: 100">
+    </th>
+  </tr>
+</table>
+          <h4>Хотите такое же меню? <a href="{% url 'register' %}">Зарегистрируйтесь</a></h4>
+    {% else %}
+
+
     <div class="element">
         {% if has_meals %}
         <p class="title">Вы уже спланировали обед на эту неделю! Вы можете посмотреть <a href="{% url 'week_menu' %}">меню на неделю</a></p>
@@ -14,5 +51,5 @@
         <a href="{% url 'generate_menu' %}"><button class="btn btn-success">Создать</button></a>
         {% endif %}
     </div>
-
+    {% endif %}
 {% endblock %}
