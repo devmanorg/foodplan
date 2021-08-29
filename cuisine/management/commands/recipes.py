@@ -62,7 +62,6 @@ def parse_recipe(url):
 
 
 def parse_quantity_and_units(soup, portions):
-    # allowed_units = ['кг', 'мл', 'г', 'л', 'по вкусу']
     quantities = []
     for layout in soup:
         quantity = 0
@@ -96,8 +95,36 @@ def parse_quantity_and_units(soup, portions):
             quantity = float(quantity_with_units.replace(units, '').strip())
 
         quantity /= int(portions)
+        units, quantity = normalize_units(units, quantity)
+
         quantities.append((f'{quantity:.3f}', units))
     return quantities
+
+
+def normalize_units(units, quantity):
+    if 'штук' in units:
+        units = 'штука'
+    elif 'стол' in units:
+        units = 'ст л'
+    elif 'чай' in units:
+        units = 'ч л'
+    elif 'голов' in units:
+        units = 'головка'
+    elif 'пуч' in units:
+        units = 'пучок'
+    elif 'стакан' in units:
+        units = 'стакан'
+    elif 'зубч' in units:
+        units = 'зубчик'
+    elif 'стеб' in units:
+        units = 'стебель'
+    elif 'кг' == units or 'кило' in units:
+        units = 'г'
+        quantity *= 1000
+    elif 'л' == units or 'литр' in units:
+        units = 'мл'
+        quantity *= 1000
+    return units, quantity
 
 
 @transaction.atomic
@@ -155,38 +182,31 @@ def record_recipe(recipe):
     download_image(recipe['image'], dish)
 
 
-def record_ingredients(ingredients_and_quantity):
+def get_common_units(ingredients_and_quantity):
+    most_common_units = {}
     for recipe in ingredients_and_quantity:
         for name, quantity_with_units in recipe.items():
             _, units = quantity_with_units
-            ingredient, _ = Ingredient.objects.get_or_create(name=name)
-            if 'штук' in units:
-                units = 'штука'
-            elif 'стол' in units:
-                units = 'столовая ложка'
-            elif 'чай' in units:
-                units = 'чайная ложка'
-            elif 'голов' in units:
-                units = 'головка'
-            elif 'пуч' in units:
-                units = 'пучок'
-            elif 'стакан' in units:
-                units = 'стакан'
-            elif 'зубч' in units:
-                units = 'зубчик'
-            elif 'кг' == units or 'кило' in units:
-                units = 'г'
-            elif 'л' == 'units' or 'литр' in units:
-                units = 'мл'
-            if units.lower() != 'по вкусу' and not ingredient.units:
-                ingredient.units = units
-                ingredient.save()
-    # ingredients = [
-    #     Ingredient(name=name, units=units)
-    #     for name, _, units in ingredients_and_quantity.items()
-    #     if units.lower() != 'по вкусу'
-    # ]
-    # Ingredient.objects.bulk_create(ingredients)
+            if units == 'по вкусу':
+                break
+            if name not in most_common_units:
+                most_common_units.setdefault(name, dict())
+            most_common_units[name].setdefault(units, 0)
+            most_common_units[name][units] += 1
+
+    return {
+        ingredient: max(counter, key=counter.get)
+        for ingredient, counter in most_common_units.items()
+    }
+
+
+def record_ingredients(ingredients_and_quantity):
+    ingredients_and_units = get_common_units(ingredients_and_quantity)
+    ingredients = [
+        Ingredient(name=name, units=units)
+        for name, units in ingredients_and_units.items()
+    ]
+    Ingredient.objects.bulk_create(ingredients)
 
 
 def download_image(url, dish):
