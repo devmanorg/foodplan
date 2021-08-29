@@ -118,6 +118,10 @@ def normalize_units(units, quantity):
         units = 'зубчик'
     elif 'стеб' in units:
         units = 'стебель'
+    elif 'кус' in units:
+        units = 'кусок'
+    elif 'бан' in units:
+        units = 'банка'
     elif units == 'кг' or 'кило' in units:
         units = 'г'
         quantity *= 1000
@@ -162,7 +166,11 @@ def record_recipe(recipe):
         positions.append(position)
 
     IngredientPosition.objects.bulk_create(positions)
-    download_image(recipe['image'], dish)
+    try:
+        download_image(recipe['image'], dish)
+    except CommandError:
+        transaction.set_rollback(True)
+        return None
 
 
 def get_common_units(ingredients_and_quantity):
@@ -211,9 +219,12 @@ def download_image(url, dish):
 def fill_recipes_json():
     recipes = []
     for number in range(14444, 16945):
-        url = f'https://eda.ru/recepty/supy/sirnij-sup-po-francuzski-s-kuricej-{number}'
-        if recipe := parse_recipe(url):
-            recipes.append(recipe)
+        try:
+            url = f'https://eda.ru/recepty/supy/sirnij-sup-po-francuzski-s-kuricej-{number}'
+            if recipe := parse_recipe(url):
+                recipes.append(recipe)
+        except HTTPError:
+            continue
     return recipes
 
 
