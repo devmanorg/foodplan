@@ -1,5 +1,6 @@
 import datetime
 import os
+import random
 
 from django.template.context_processors import csrf
 from django.http import HttpResponseRedirect
@@ -35,9 +36,23 @@ def get_days(request):
     return render(request, f'{TEMPLATE}/name.html', context=context)
 
 
+def get_random_menu():
+    dishes = Dish.objects.prefetch_related('tags')
+    random_menu = {
+        'breakfast': random.choice(dishes.filter(tags__name='завтрак')),
+        'lunch': random.choice(dishes.filter(tags__name='обед')),
+        'dinner': random.choice(dishes.filter(tags__name='ужин')),
+    }
+    return random_menu
+
+
 def index_page(request):
-    context = {'has_meals': has_meals(user=request.user, current_date=datetime.date.today())}
-    return render(request, f'{TEMPLATE}/index.html', context)
+    if not request.user.is_authenticated:
+        context = get_random_menu()
+        return render(request, f'{TEMPLATE}/index.html', context)
+    else:
+        context = {'has_meals': has_meals(user=request.user, current_date=datetime.date.today())}
+        return render(request, f'{TEMPLATE}/index.html', context)
 
 
 def show_next_week_menu(request):
@@ -133,7 +148,7 @@ def register(request):
             new_user = user_form.save(commit=False)
             new_user.set_password(user_form.cleaned_data['password'])
             new_user.save()
-            return render(request, 'register_done.html', {'new_user': new_user})
+            return render(request, f'{TEMPLATE}/register_done.html', {'new_user': new_user})
     else:
         user_form = UserRegistrationForm()
     return render(request, f'{TEMPLATE}/register.html', {'user_form': user_form})
