@@ -19,7 +19,7 @@
 
     <tr>
       <td><img src="{{ recipe.image.url }}" class="card-img" style="max-width: 100"></td>
-      <td>{{ recipe.cooking_time }} минут</td>
+      <td>{{ recipe.cooking_time }}</td>
       <td>
         {% for position in recipe.positions.all %}
           {{ position.ingredient }} - {{ position.quantity }} {{ position.ingredient.units }}<br>
