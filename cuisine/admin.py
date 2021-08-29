@@ -25,7 +25,7 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'units', 'price')
 
 
 class MealPositionInline(admin.TabularInline):

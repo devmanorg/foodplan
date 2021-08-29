@@ -42,6 +42,9 @@ def parse_recipe(url):
     quantity_soup = soup.find_all(class_='css-1t5teuh-Info')
     quantities = parse_quantity_and_units(quantity_soup, portions)
 
+    if not quantities:
+        return None
+
     ingredients_and_quantity = dict(zip(ingredients, quantities))
 
     recipe_steps = [step.text for step in soup.find_all(class_='css-8repvw-Info')]
@@ -59,6 +62,7 @@ def parse_recipe(url):
 
 
 def parse_quantity_and_units(soup, portions):
+    # allowed_units = ['кг', 'мл', 'г', 'л', 'по вкусу']
     quantities = []
     for layout in soup:
         quantity = 0
@@ -111,19 +115,78 @@ def record_recipe(recipe):
     positions = []
     for ingredient, quantity_with_units in recipe['ingredients_and_quantity'].items():
         quantity, units = quantity_with_units
+        quantity = float(quantity)
+        if 'штук' in units:
+            units = 'штука'
+        elif 'стол' in units:
+            units = 'столовая ложка'
+        elif 'чай' in units:
+            units = 'чайная ложка'
+        elif 'голов' in units:
+            units = 'головка'
+        elif 'пуч' in units:
+            units = 'пучок'
+        elif 'стакан' in units:
+            units = 'стакан'
+        elif 'зубч' in units:
+            units = 'зубчик'
+        elif 'кг' == units or 'кило' in units:
+            units = 'г'
+            quantity *= 1000
+        elif 'л' == 'units' or 'литр' in units:
+            units = 'мл'
+            quantity *= 1000
 
-        ingredient_model, created = Ingredient.objects.get_or_create(name=ingredient)
+        ingredient_model = Ingredient.objects.get(name=ingredient)
+        if units == 'по вкусу':
+            quantity = 0
+        elif units != ingredient_model.units:
+            transaction.set_rollback(True)
+            return None
 
         position = IngredientPosition(
             ingredient=ingredient_model,
             quantity=quantity,
             dish=dish,
-            units=units,
         )
         positions.append(position)
 
     IngredientPosition.objects.bulk_create(positions)
     download_image(recipe['image'], dish)
+
+
+def record_ingredients(ingredients_and_quantity):
+    for recipe in ingredients_and_quantity:
+        for name, quantity_with_units in recipe.items():
+            _, units = quantity_with_units
+            ingredient, _ = Ingredient.objects.get_or_create(name=name)
+            if 'штук' in units:
+                units = 'штука'
+            elif 'стол' in units:
+                units = 'столовая ложка'
+            elif 'чай' in units:
+                units = 'чайная ложка'
+            elif 'голов' in units:
+                units = 'головка'
+            elif 'пуч' in units:
+                units = 'пучок'
+            elif 'стакан' in units:
+                units = 'стакан'
+            elif 'зубч' in units:
+                units = 'зубчик'
+            elif 'кг' == units or 'кило' in units:
+                units = 'г'
+            elif 'л' == 'units' or 'литр' in units:
+                units = 'мл'
+            if units.lower() != 'по вкусу' and not ingredient.units:
+                ingredient.units = units
+                ingredient.save()
+    # ingredients = [
+    #     Ingredient(name=name, units=units)
+    #     for name, _, units in ingredients_and_quantity.items()
+    #     if units.lower() != 'по вкусу'
+    # ]
+    # Ingredient.objects.bulk_create(ingredients)
 
 
 def download_image(url, dish):
@@ -144,7 +207,7 @@ def download_image(url, dish):
 
 def fill_recipes_json():
     recipes = []
-    for number in range(14444, 14545):
+    for number in range(14444, 14745):
         url = f'https://eda.ru/recepty/supy/sirnij-sup-po-francuzski-s-kuricej-{number}'
         if recipe := parse_recipe(url):
             recipes.append(recipe)
@@ -177,7 +240,14 @@ class Command(BaseCommand):
             default=False,
             type=bool,
             nargs='?',
-            help='Записывает файлы из полученного json'
+            help='Записывает файлы из полученного json',
+        )
+        parser.add_argument(
+            '--ing',
+            default=False,
+            type=bool,
+            nargs='?',
+            help='Записывает спискок ингердиентов',
         )
 
     def handle(self, *args, **options):
@@ -188,3 +258,10 @@ class Command(BaseCommand):
             recipes = read_json()
             for recipe in recipes:
                 record_recipe(recipe)
+        elif options['ing']:
+            recipes = read_json()
+            ingredients_and_quantity = [
+                recipe['ingredients_and_quantity']
+                for recipe in recipes
+            ]
+            record_ingredients(ingredients_and_quantity)
