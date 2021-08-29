@@ -1,0 +1,41 @@
+{% load static %}
+<header class="main-header">
+    <div class="topbar">
+        <div class="container">
+            <div class="main-logo">
+                <a href="/" class="logo">
+                    <img src="{% static 'oganik/assets/images/logo-dark.png' %}" width="105" alt="">
+                </a>
+                <div class="mobile-nav__buttons">
+                    <a href="#" class="search-toggler"><i class="organik-icon-magnifying-glass"></i></a>
+                    <a href="#" class="mini-cart__toggler"><i class="organik-icon-shopping-cart"></i></a>
+                </div><!-- /.mobile__buttons -->
+
+                <span class="fa fa-bars mobile-nav__toggler"></span>
+            </div><!-- /.main-logo -->
+
+        </div><!-- /.container -->
+    </div><!-- /.topbar -->
+    <nav class="main-menu">
+        <div class="container">
+            <ul class="main-menu__list">
+                {% if request.user.is_authenticated %}
+                <li class="dropdown">
+                    <a href="index.html">Меню</a>
+                    <ul>
+                        <li>
+                            <a href="index.html">На сегодня</a>
+                        </li>
+                        <li><a href="index-2.html">На неделю</a></li>
+                    </ul>
+                </li>
+                <li><a href="about.html">Сходить в магазин</a></li>
+                {% else %}
+                <li><a href="about.html">Войти</a></li>
+                <li><a href="about.html">Регистрация</a></li>
+                {% endif %}
+            </ul>
+        </div><!-- /.container -->
+    </nav>
+    <!-- /.main-menu -->
+</header><!-- /.main-header -->

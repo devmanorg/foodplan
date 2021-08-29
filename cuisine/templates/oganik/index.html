@@ -1,0 +1,60 @@
+{% extends 'oganik/layouts/base.html' %}
+
+{% block content %}
+    {%  if not request.user.is_authenticated %}
+<br>
+<section class="new-products">
+    <div class="container">
+        <div class="new-products__top">
+            <div class="block-title ">
+                <h3>Случайное меню</h3>
+            </div><!-- /.block-title -->
+
+            <ul class="post-filter filters list-unstyled">
+                <li class="active filter" data-filter=".filter-item">Все блюда</li>
+                <li class="filter" data-filter=".breakfast">Завтрак</li>
+                <li class="filter" data-filter=".lunch">Обед</li>
+                <li class="filter" data-filter=".dinner">Ужин</li>
+            </ul>
+        </div><!-- /.new-products__top -->
+        <h4 class="text-center">Хочешь такое же меню на неделю? <a href="{% url 'register' %}">Регистрируйся</a></h4>
+        <br>
+        <br>
+        <div class="row filter-layout">
+            {% for item in menu_items %}
+            <div class="col-lg-4 col-md-6 filter-item {{ item.meal_type_en }}">
+                <div class="product-card__two">
+                    <div class="product-card__two-image">
+                        <span class="product-card__two-sale">{{ item.meal_type_ru }}</span>
+                        <img src="{{ item.image_url }}" alt="">
+                        <div class="product-card__two-image-content">
+                            <a href="#"><i class="organik-icon-visibility"></i></a>
+                            <a href="#"><i class="organik-icon-heart"></i></a>
+                            <a href="cart.html"><i class="organik-icon-shopping-cart"></i></a>
+                        </div><!-- /.product-card__two-image-content -->
+                    </div><!-- /.product-card__two-image -->
+                    <div class="product-card__two-content">
+                        <h3><a href="{% url 'recipe' item.dish_id %}">{{ item.dish_name }}</a></h3>
+                    </div><!-- /.product-card__two-content -->
+                </div><!-- /.product-card__two -->
+            </div><!-- /.col-lg-4 -->
+            {% endfor %}
+        </div><!-- /.row -->
+
+    </div><!-- /.container -->
+</section><!-- /.new-products -->
+
+
+    {% else %}
+
+
+    <div class="element">
+        {% if has_meals %}
+        <p class="title">Вы уже спланировали обед на эту неделю! Вы можете посмотреть <a href="{% url 'week_menu' %}">меню на неделю</a></p>
+        {% else %}
+        <p class="title">Кажется, у вас нет плана еды на неделю! Нажмите на кнопку "Создать", чтобы мы подобрали вам меню на неделю!</p>
+        <a href="{% url 'generate_menu' %}"><button class="btn btn-success">Создать</button></a>
+        {% endif %}
+    </div>
+    {% endif %}
+{% endblock %}

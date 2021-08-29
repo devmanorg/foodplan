@@ -28,6 +28,8 @@ TEMPLATE = os.getenv('TEMPLATE', 'pure_bootstrap')
 
 if TEMPLATE == 'pure_bootstrap':
     from cuisine.views import pure_bootstrap as views
+elif TEMPLATE == 'oganik':
+    from cuisine.views import oganik as views
 
 
 urlpatterns = [
