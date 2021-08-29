@@ -118,10 +118,10 @@ def normalize_units(units, quantity):
         units = 'зубчик'
     elif 'стеб' in units:
         units = 'стебель'
-    elif 'кг' == units or 'кило' in units:
+    elif units == 'кг' or 'кило' in units:
         units = 'г'
         quantity *= 1000
-    elif 'л' == units or 'литр' in units:
+    elif units == 'л' or 'литр' in units:
         units = 'мл'
         quantity *= 1000
     return units, quantity
@@ -143,28 +143,11 @@ def record_recipe(recipe):
     for ingredient, quantity_with_units in recipe['ingredients_and_quantity'].items():
         quantity, units = quantity_with_units
         quantity = float(quantity)
-        if 'штук' in units:
-            units = 'штука'
-        elif 'стол' in units:
-            units = 'столовая ложка'
-        elif 'чай' in units:
-            units = 'чайная ложка'
-        elif 'голов' in units:
-            units = 'головка'
-        elif 'пуч' in units:
-            units = 'пучок'
-        elif 'стакан' in units:
-            units = 'стакан'
-        elif 'зубч' in units:
-            units = 'зубчик'
-        elif 'кг' == units or 'кило' in units:
-            units = 'г'
-            quantity *= 1000
-        elif 'л' == 'units' or 'литр' in units:
-            units = 'мл'
-            quantity *= 1000
-
-        ingredient_model = Ingredient.objects.get(name=ingredient)
+        try:
+            ingredient_model = Ingredient.objects.get(name=ingredient)
+        except Ingredient.DoesNotExist:
+            transaction.set_rollback(True)
+            return None
         if units == 'по вкусу':
             quantity = 0
         elif units != ingredient_model.units:
@@ -227,7 +210,7 @@ def download_image(url, dish):
 
 def fill_recipes_json():
     recipes = []
-    for number in range(14444, 14745):
+    for number in range(14444, 16945):
         url = f'https://eda.ru/recepty/supy/sirnij-sup-po-francuzski-s-kuricej-{number}'
         if recipe := parse_recipe(url):
             recipes.append(recipe)
