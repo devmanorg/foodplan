@@ -12,52 +12,109 @@ from cuisine.forms import DaysForm, LoginForm
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from cuisine.forms import UserRegistrationForm
-from cuisine.services import generate_menu_randomly, has_meals
-
+from cuisine.services import generate_menu_randomly
 
 TEMPLATE = os.getenv('TEMPLATE', 'oganik')
 MEAL_TYPE_RU_TO_EN = {'завтрак': 'breakfast', 'обед': 'lunch', 'ужин': 'dinner'}
 
 
-def get_days(request):
-    if request.method == 'POST':
-        form = DaysForm(request.POST)
-        if form.is_valid():
-            return HttpResponseRedirect('calculator')
-    else:
-        form = DaysForm()
-
-    context = {'form': form}
-    context.update(csrf(request))
-
-    return render(request, f'{TEMPLATE}/name.html', context=context)
-
-
-def create_random_menu():
+def get_random_menu():
     dishes = Dish.objects.prefetch_related('tags')
-    menu_items = [
-        {
-            'dish_id': dish.id,
-            'dish_name': dish.name,
-            'image_url': dish.image.url,
-            'meal_type_ru': meal_type.capitalize(),
-            'meal_type_en': MEAL_TYPE_RU_TO_EN[meal_type],
-        }
-        for meal_type, count in [('завтрак', 1), ('обед', 1), ('ужин', 1)]
-        for dish in random.choices(dishes.filter(tags__name=meal_type), k=count)
-    ]
-    return menu_items
+    random_menu = {
+        'breakfast': random.choice(dishes.filter(tags__name='завтрак')),
+        'lunch': random.choice(dishes.filter(tags__name='обед')),
+        'dinner': random.choice(dishes.filter(tags__name='ужин')),
+    }
+    return random_menu
 
 
 def index_page(request):
+    global saved_random_menu
     if not request.user.is_authenticated:
-        return render(request, f'{TEMPLATE}/index.html', context={'menu_items': create_random_menu()})
-    else:
-        context = {'has_meals': has_meals(user=request.user, current_date=datetime.date.today())}
+        context = get_random_menu()
+        saved_random_menu = [context['breakfast'].id, context['lunch'].id, context['dinner'].id]
         return render(request, f'{TEMPLATE}/index.html', context)
+    else:
+        return redirect('week_menu')
+
+
+def daily_menu(user):
+    items = (
+        MealPosition.objects
+        .filter(meal__date=datetime.date.today(), meal__customer=user)
+        .select_related('dish', 'meal')
+    )
+    context = {item.meal.meal_type.lower(): (item, item.dish.id) for item in items}
+    return context
+
+
+def generate_next_week_menu(user):
+    dishes = Dish.objects.prefetch_related('tags')
+
+    local_dishes = {
+        'breakfast': list(dishes.filter(tags__name='завтрак')),
+        'lunch': list(dishes.filter(tags__name='обед')),
+        'dinner': list(dishes.filter(tags__name='ужин')),
+    }
+
+    for index, meal_type in enumerate(local_dishes):
+        first_day_meal = Meal.objects.create(
+            meal_type=meal_type.upper(),
+            date=datetime.datetime.today(),
+            customer=user)
+        MealPosition.objects.create(
+            meal=first_day_meal,
+            dish=dishes.get(id=saved_random_menu[index]),
+            quantity=1)
+    for index, dish in enumerate(local_dishes):
+        local_dishes[dish].remove(dishes.get(id=saved_random_menu[index]))
+
+    first_date = datetime.datetime.today() + datetime.timedelta(days=1)
+    for day in range(6):
+        date = first_date + datetime.timedelta(days=day)
+        for meal_type in local_dishes:
+            meal = Meal.objects.create(
+                meal_type=meal_type.upper(),
+                date=date,
+                customer=user)
+            dish = local_dishes[meal_type].pop(random.choice(range(len(local_dishes[meal_type]))))
+            MealPosition.objects.create(
+                meal=meal,
+                dish=dish,
+                quantity=1)
+
+
+def generate_last_day_week_menu(user, needed_generated_menu_days):
+    dishes = Dish.objects.prefetch_related('tags')
+
+    local_dishes = {
+        'breakfast': list(dishes.filter(tags__name='завтрак')),
+        'lunch': list(dishes.filter(tags__name='обед')),
+        'dinner': list(dishes.filter(tags__name='ужин')),
+    }
+    first_date = datetime.datetime.today() + datetime.timedelta(days=needed_generated_menu_days + 1)
+    for day in range(7 - needed_generated_menu_days):
+        date = first_date + datetime.timedelta(days=day)
+        for meal_type in local_dishes:
+            meal = Meal.objects.create(
+                meal_type=meal_type.upper(),
+                date=date,
+                customer=user)
+            dish = local_dishes[meal_type].pop(random.choice(range(len(local_dishes[meal_type]))))
+            MealPosition.objects.create(
+                meal=meal,
+                dish=dish,
+                quantity=1)
 
 
 def show_next_week_menu(request):
+    if not Meal.objects.filter(customer=request.user):
+        generate_next_week_menu(request.user)
+    last_meal_date = Meal.objects.filter(customer=request.user).last().date
+    needed_generated_menu_days = (last_meal_date - datetime.datetime.today().date()).days
+    if 0 <= needed_generated_menu_days < 7:
+        generate_last_day_week_menu(request.user, needed_generated_menu_days)
+
     weekdays = count_days(7)
     meals = (
         Meal.objects
@@ -83,54 +140,51 @@ def show_next_week_menu(request):
 
 
 def calculate_products(request):
-    form = DaysForm()
-    days_to_calculate = int(request.POST.get('days', 0))
-    weekdays = count_days(days_to_calculate)
+    if request.method == 'POST':
+        form = DaysForm(request.POST)
+        if not form.is_valid():
+            return render(request, f'{TEMPLATE}/calculator.html')
+        days_to_calculate = int(request.POST.get('days', 0))
+        weekdays = count_days(days_to_calculate)
 
-    ingredients = (
-        Meal.objects
-        .filter(date__in=weekdays, customer=request.user)
-        .values_list(
-            'meal_positions__dish__positions__ingredient__name',
-            'meal_positions__dish__positions__quantity',
-            'meal_positions__dish__positions__ingredient__units',
-            'meal_positions__dish__positions__ingredient__price',
+        ingredients = (
+            Meal.objects
+            .filter(date__in=weekdays, customer=request.user)
+            .values_list(
+                'meal_positions__dish__positions__ingredient__name',
+                'meal_positions__dish__positions__quantity',
+                'meal_positions__dish__positions__ingredient__units',
+                'meal_positions__dish__positions__ingredient__price',
+            )
         )
-    )
 
-    total_ingredients = {}
-    total_sum = 0
-    for ingredient, quantity, units, price in ingredients:
-        if price is None:
-            price = 0
-        # ingredient_info = {
-        #     'quantity': quantity,
-        #     'units': units,
-        #     'total_price': 0,
-        # }
-        total_ingredients.setdefault(ingredient, [0, units, 0])
-        # total_ingredient_price = ingredient['quantity'] * ingredient['price']
-        # if units == 'г' or units == 'мл':
-        #     total_ingredient_price /= 1000
-        # ingredient['quantity'] += ingredient_info['quantity']
-        # ingredient['total_price'] += total_ingredient_price
+        total_ingredients = {}
+        total_sum = 0
+        for ingredient, quantity, units, price in ingredients:
+            if price is None:
+                price = 0
+            total_ingredients.setdefault(ingredient, [0, units, 0])
+            total_ingredients[ingredient][0] += float(f'{quantity:.2f}')
+            ingredient_price = quantity * int(price)
+            if units == 'г' or units == 'мл':
+                ingredient_price = quantity * int(price) / 1000
+            total_ingredients[ingredient][2] += float(f'{ingredient_price:.2f}')
+            total_sum += ingredient_price
 
-        total_ingredients[ingredient][0] += float(f'{quantity:.2f}')
-        ingredient_price = quantity * int(price)
-        if units == 'г' or units == 'мл':
-            ingredient_price = quantity * int(price) / 1000
-        total_ingredients[ingredient][2] += float(f'{ingredient_price:.2f}')
-        total_sum += ingredient_price
-
-    context = {
-        'ingredients': total_ingredients, 'form': form,
-        'total_sum': round(total_sum)
-    }
-    if weekdays:
-        context['start_day'] = weekdays[0]
-        context['end_day'] = weekdays[-1]
+        context = {
+            'ingredients': total_ingredients, 'form': form,
+            'total_sum': round(total_sum)
+        }
+        context.update(csrf(request))
+        if weekdays:
+            context['start_day'] = weekdays[0]
+            context['end_day'] = weekdays[-1]
+    else:
+        form = DaysForm()
+        context = {'form': form}
 
     return render(request, f'{TEMPLATE}/calculator.html', context)
+
 
 
 def view_recipe(request, recipe_id):

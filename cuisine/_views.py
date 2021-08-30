@@ -116,14 +116,14 @@ def count_days(days_count):
     ]
 
 
-def show_daily_menu(request):
-    items = (
-        MealPosition.objects
-        .filter(meal__date=datetime.date.today(), meal__customer=request.user)
-        .select_related('dish', 'meal')
-    )
-    context = {item.meal.meal_type.lower(): (item, item.dish.id) for item in items}
-    return render(request, f'{TEMPLATE}/daily_menu.html', context=context)
+# def show_daily_menu(request):
+#     items = (
+#         MealPosition.objects
+#         .filter(meal__date=datetime.date.today(), meal__customer=request.user)
+#         .select_related('dish', 'meal')
+#     )
+#     context = {item.meal.meal_type.lower(): (item, item.dish.id) for item in items}
+#     return render(request, f'{TEMPLATE}/daily_menu.html', context=context)
 
 
 def register(request):

@@ -27,11 +27,6 @@
                     <div class="product-card__two-image">
                         <span class="product-card__two-sale">{{ item.meal_type_ru }}</span>
                         <img src="{{ item.image_url }}" alt="">
-                        <div class="product-card__two-image-content">
-                            <a href="#"><i class="organik-icon-visibility"></i></a>
-                            <a href="#"><i class="organik-icon-heart"></i></a>
-                            <a href="cart.html"><i class="organik-icon-shopping-cart"></i></a>
-                        </div><!-- /.product-card__two-image-content -->
                     </div><!-- /.product-card__two-image -->
                     <div class="product-card__two-content">
                         <h3><a href="{% url 'recipe' item.dish_id %}">{{ item.dish_name }}</a></h3>
@@ -52,8 +47,8 @@
         {% if has_meals %}
         <p class="title">Вы уже спланировали обед на эту неделю! Вы можете посмотреть <a href="{% url 'week_menu' %}">меню на неделю</a></p>
         {% else %}
-        <p class="title">Кажется, у вас нет плана еды на неделю! Нажмите на кнопку "Создать", чтобы мы подобрали вам меню на неделю!</p>
-        <a href="{% url 'generate_menu' %}"><button class="btn btn-success">Создать</button></a>
+        {% comment %} <p class="title">Кажется, у вас нет плана еды на неделю! Нажмите на кнопку "Создать", чтобы мы подобрали вам меню на неделю!</p>
+        <a href="{% url 'generate_menu' %}"><button class="btn btn-success">Создать</button></a> {% endcomment %}
         {% endif %}
     </div>
     {% endif %}

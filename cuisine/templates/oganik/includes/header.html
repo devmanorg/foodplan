@@ -20,15 +20,7 @@
         <div class="container">
             <ul class="main-menu__list">
                 {% if request.user.is_authenticated %}
-                <li class="dropdown">
-                    <a>Меню</a>
-                    <ul>
-                        <li>
-                            <a href="{% url 'daily_menu' %}">На сегодня</a>
-                        </li>
-                        <li><a href="{% url 'week_menu' %}">На неделю</a></li>
-                    </ul>
-                </li>
+                <li><a href="{% url 'week_menu' %}">Меню</a></li>
                 <li><a href="{% url 'calculator' %}">Сходить в магазин</a></li>
                 <li><a href="{% url 'logout' %}">Выйти</a></li>
 

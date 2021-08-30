@@ -1,0 +1,38 @@
+{% extends 'oganik/layouts/base.html' %}
+
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+    <label>Введите количество дней, чтобы расчитать общее число покупок</label>
+    <select onChange="form.submit()" name="days">
+      <option value={{form.days}}></option>
+    </select>
+</form>
+
+{% if start_day %}
+  {% if start_day == end_day %}
+    <h3>Список покупок для приготовления пищи на сегодня</h3>
+  {% else %}
+    <h3>Список покупок для приготовления пищи с {{start_day}} по {{end_day}}</h3>
+  {% endif %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Ингредиент</th>
+      <th scope="col">Количество</th>
+      <th scope="col">Цена за шт / кг / л</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ingredient, quantity in ingredients.items %}
+      <tr>
+        <td>{{ingredient}}</td>
+        <td>{{quantity.0}} {{quantity.1}}</td>
+        <td>{{quantity.2}} р.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<h1 align="center">Итоговая сумма:  {{total_sum}} рублей</h1>
+{% endif %}
+{% endblock %}

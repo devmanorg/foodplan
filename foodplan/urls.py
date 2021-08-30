@@ -36,7 +36,7 @@ urlpatterns = [
     path('', views.index_page, name='index'),
     path('admin/', admin.site.urls, name='admin'),
     path('week_menu/', views.show_next_week_menu, name='week_menu'),
-    path('daily_menu/', views.show_daily_menu, name='daily_menu'),
+    # path('daily_menu/', views.show_daily_menu, name='daily_menu'),
     path('calculator/', views.calculate_products, name='calculator'),
     path('recipe/<int:recipe_id>', views.view_recipe, name='recipe'),
     path('__debug__/', include(debug_toolbar.urls)),

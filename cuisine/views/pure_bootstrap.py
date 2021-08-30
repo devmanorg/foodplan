@@ -31,8 +31,7 @@ def index_page(request):
         saved_random_menu = [context['breakfast'].id, context['lunch'].id, context['dinner'].id]
         return render(request, f'{TEMPLATE}/index.html', context)
     else:
-        context = daily_menu(request.user)
-        return render(request, f'{TEMPLATE}/index.html', context)
+        return redirect('week_menu')
 
 
 def daily_menu(user):
@@ -195,9 +194,9 @@ def count_days(days_count):
     ]
 
 
-def show_daily_menu(request):
-    context = daily_menu(request.user)
-    return render(request, f'{TEMPLATE}/daily_menu.html', context=context)
+# def show_daily_menu(request):
+#     context = daily_menu(request.user)
+#     return render(request, f'{TEMPLATE}/daily_menu.html', context=context)
 
 
 def register(request):
