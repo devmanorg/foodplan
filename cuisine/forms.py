@@ -17,14 +17,18 @@ class DaysForm(forms.Form):
 
 
 class UserRegistrationForm(forms.ModelForm):
-    username = forms.CharField(label='Username')
-    password = forms.CharField(label='Password', widget=forms.PasswordInput)
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Username'}))
+    password = forms.CharField(label='Password', widget=forms.TextInput(attrs={'placeholder': 'Password'}))
 
     class Meta:
         model = User
         fields = ('username',)
 
 
-class LoginForm(forms.Form):
-    username = forms.CharField()
-    password = forms.CharField(widget=forms.PasswordInput)
+class LoginForm(forms.ModelForm):
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Username'}))
+    password = forms.CharField(label='Password', widget=forms.TextInput(attrs={'placeholder': 'Password'}))
+
+    class Meta:
+        model = User
+        fields = ('username',)

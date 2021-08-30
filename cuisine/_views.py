@@ -17,8 +17,8 @@ from .services import generate_menu_randomly, has_meals
 TEMPLATE = os.getenv('TEMPLATE', 'pure_bootstrap')
 
 
-def dashboard(request):
-    return render(request, 'dashboard.html', {'section': 'dashboard'})
+# def dashboard(request):
+#     return render(request, 'dashboard.html', {'section': 'dashboard'})
 
 
 def get_days(request):

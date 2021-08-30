@@ -1,0 +1,30 @@
+{% extends "oganik/layouts/base.html" %}
+{% load static %}
+{% block title %}Создайте профиль{% endblock %}
+{% block content %}
+<section class="contact-one">
+    <img src="{% static 'oganik/assets/images/shapes/contact-bg-1-1.png' %}" alt="" class="contact-one__shape-1">
+    <img src="{% static 'oganik/assets/images/shapes/contact-bg-1-2.png' %}" alt="" class="contact-one__shape-2">
+    <div class="container">
+        <div class="block-title text-center">
+            <div class="block-title__decor"></div><!-- /.block-title__decor -->
+            <h3>Регистрация</h3>
+        </div><!-- /.block-title -->
+        <form action="." class="contact-form-validated contact-one__form" method="post">
+            <div class="row">
+                <div class="col-md-12">
+                    {{ user_form.username }}
+                </div>
+                <div class="col-md-12">
+                    {{ user_form.password }}
+                </div><!-- /.col-md-6 -->
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}"/>
+                <div class="col-12 text-center">
+                    <input type="submit" class="btn btn-primary" name="submit" />
+                </div><!-- /.col-md-6 -->
+            </div><!-- /.row -->
+        </form>
+    </div><!-- /.container -->
+</section><!-- /.contact-one -->
+{% endblock %}

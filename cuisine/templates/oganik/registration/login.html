@@ -2,8 +2,6 @@
 {% load static %}
 {% block title %}Вход{% endblock %}
 {% block content %}
-
-
 <section class="contact-one">
     <img src="{% static 'oganik/assets/images/shapes/contact-bg-1-1.png' %}" alt="" class="contact-one__shape-1">
     <img src="{% static 'oganik/assets/images/shapes/contact-bg-1-2.png' %}" alt="" class="contact-one__shape-2">
@@ -12,16 +10,13 @@
             <div class="block-title__decor"></div><!-- /.block-title__decor -->
             <h3>Войти</h3>
         </div><!-- /.block-title -->
-        <form action="{% url 'login' %}" class="contact-form-validated contact-one__form">
+        <form action="." class="contact-form-validated contact-one__form" method="post">
             <div class="row">
                 <div class="col-md-12">
-                    <input type="text" placeholder="Email" name="email">
+                    {{ form.username }}
                 </div>
-                <div class="col-md-6">
-                    <input type="text" placeholder="Пароль" name="password">
-                </div><!-- /.col-md-6 -->
-                <div class="col-md-6">
-                    <input type="text" placeholder="Повторите пароль" name="password">
+                <div class="col-md-12">
+                    {{ form.password }}
                 </div><!-- /.col-md-6 -->
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ next }}"/>

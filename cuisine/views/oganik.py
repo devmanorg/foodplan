@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 
 from cuisine.models import Meal, Dish, MealPosition
-from cuisine.forms import DaysForm, LoginForm, DashboardForm
+from cuisine.forms import DaysForm, LoginForm
 
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
@@ -17,23 +17,6 @@ from cuisine.services import generate_menu_randomly, has_meals
 
 TEMPLATE = os.getenv('TEMPLATE', 'oganik')
 MEAL_TYPE_RU_TO_EN = {'завтрак': 'breakfast', 'обед': 'lunch', 'ужин': 'dinner'}
-
-
-def dashboard(request):
-    if request.method == 'POST':
-        form = DashboardForm(request.POST)
-        if form.is_valid():
-            print(form.data)
-            return HttpResponseRedirect('dashboard')
-    else:
-        form = DashboardForm()
-    context = {
-        'section': 'dashboard',
-        'form': form,
-    }
-    context = {'form': form}
-    context.update(csrf(request))
-    return render(request, f'{TEMPLATE}/dashboard.html', context=context)
 
 
 def get_days(request):
@@ -60,7 +43,7 @@ def create_random_menu():
             'meal_type_ru': meal_type.capitalize(),
             'meal_type_en': MEAL_TYPE_RU_TO_EN[meal_type],
         }
-        for meal_type, count in [('завтрак', 2), ('обед', 3), ('ужин', 2)]
+        for meal_type, count in [('завтрак', 1), ('обед', 1), ('ужин', 1)]
         for dish in random.choices(dishes.filter(tags__name=meal_type), k=count)
     ]
     return menu_items

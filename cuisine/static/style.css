@@ -19,3 +19,7 @@
     max-height: 250px;
     height: auto;
 }
+html, body {
+    min-height: 100% !important;
+    height: 100%;
+}
