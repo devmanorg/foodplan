@@ -59,8 +59,8 @@ def index_page(request):
 def daily_menu(user):
     items = (
         MealPosition.objects
-            .filter(meal__date=datetime.date.today(), meal__customer=user)
-            .select_related('dish', 'meal')
+        .filter(meal__date=datetime.date.today(), meal__customer=user)
+        .select_related('dish', 'meal')
     )
     context = {item.meal.meal_type.lower(): (item, item.dish.id) for item in items}
     return context
@@ -160,49 +160,48 @@ def show_next_week_menu(request):
 def calculate_products(request):
     if request.method == 'POST':
         form = DaysForm(request.POST)
-        if form.is_valid():
-            days_to_calculate = int(request.POST.get('days', 0))
-            weekdays = count_days(days_to_calculate)
+        if not form.is_valid():
+            return render(request, f'{TEMPLATE}/calculator.html')
+        days_to_calculate = int(request.POST.get('days', 0))
+        weekdays = count_days(days_to_calculate)
 
-            ingredients = (
-                Meal.objects
-                .filter(date__in=weekdays, customer=request.user)
-                .values_list(
-                    'meal_positions__dish__positions__ingredient__name',
-                    'meal_positions__dish__positions__quantity',
-                    'meal_positions__dish__positions__ingredient__units',
-                    'meal_positions__dish__positions__ingredient__price',
-                )
+        ingredients = (
+            Meal.objects
+            .filter(date__in=weekdays, customer=request.user)
+            .values_list(
+                'meal_positions__dish__positions__ingredient__name',
+                'meal_positions__dish__positions__quantity',
+                'meal_positions__dish__positions__ingredient__units',
+                'meal_positions__dish__positions__ingredient__price',
             )
+        )
 
-            total_ingredients = {}
-            total_sum = 0
-            for ingredient, quantity, units, price in ingredients:
-                if price is None:
-                    price = 0
-                total_ingredients.setdefault(ingredient, [0, units, 0])
-                total_ingredients[ingredient][0] += float(f'{quantity:.2f}')
-                ingredient_price = quantity * int(price)
-                if units == 'г' or units == 'мл':
-                    ingredient_price = quantity * int(price) / 1000
-                total_ingredients[ingredient][2] += float(f'{ingredient_price:.2f}')
-                total_sum += ingredient_price
+        total_ingredients = {}
+        total_sum = 0
+        for ingredient, quantity, units, price in ingredients:
+            if price is None:
+                price = 0
+            total_ingredients.setdefault(ingredient, [0, units, 0])
+            total_ingredients[ingredient][0] += float(f'{quantity:.2f}')
+            ingredient_price = quantity * int(price)
+            if units == 'г' or units == 'мл':
+                ingredient_price = quantity * int(price) / 1000
+            total_ingredients[ingredient][2] += float(f'{ingredient_price:.2f}')
+            total_sum += ingredient_price
 
-            context = {
-                'ingredients': total_ingredients, 'form': form,
-                'total_sum': round(total_sum)
-            }
-            context.update(csrf(request))
-            if weekdays:
-                context['start_day'] = weekdays[0]
-                context['end_day'] = weekdays[-1]
+        context = {
+            'ingredients': total_ingredients, 'form': form,
+            'total_sum': round(total_sum)
+        }
+        context.update(csrf(request))
+        if weekdays:
+            context['start_day'] = weekdays[0]
+            context['end_day'] = weekdays[-1]
     else:
         form = DaysForm()
         context = {'form': form}
 
     return render(request, f'{TEMPLATE}/calculator.html', context)
-
-
 
 
 def view_recipe(request, recipe_id):
