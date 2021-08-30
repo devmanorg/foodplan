@@ -2,36 +2,16 @@ import datetime
 import os
 import random
 
-from django.template.context_processors import csrf
-from django.http import HttpResponseRedirect
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.template.context_processors import csrf
 
 from cuisine.models import Meal, Dish, MealPosition
-from cuisine.forms import DaysForm, LoginForm, DashboardForm
-
-from django.http import HttpResponse
-from django.contrib.auth import authenticate, login
-from cuisine.forms import UserRegistrationForm
+from cuisine.forms import DaysForm, LoginForm, UserRegistrationForm
 
 
 TEMPLATE = os.getenv('TEMPLATE', 'pure_bootstrap')
-
-
-def dashboard(request):
-    if request.method == 'POST':
-        form = DashboardForm(request.POST)
-        if form.is_valid():
-            print(form.data)
-            return HttpResponseRedirect('dashboard')
-    else:
-        form = DashboardForm()
-    context = {
-        'section': 'dashboard',
-        'form': form,
-    }
-    context = {'form': form}
-    context.update(csrf(request))
-    return render(request, f'{TEMPLATE}/dashboard.html', context=context)
 
 
 def get_random_menu():
@@ -53,7 +33,6 @@ def index_page(request):
     else:
         context = daily_menu(request.user)
         return render(request, f'{TEMPLATE}/index.html', context)
-        # return HttpResponseRedirect('daily_menu')
 
 
 def daily_menu(user):
@@ -254,11 +233,3 @@ def user_login(request):
     else:
         form = LoginForm()
     return render(request, f'{TEMPLATE}/registration/login.html', {'form': form})
-
-
-# def generate_menu(request):
-#     is_generated = generate_menu_randomly(user=request.user, current_dt=datetime.datetime.now())
-#     if is_generated:
-#         return redirect('week_menu')
-#     else:
-#         return redirect('index')

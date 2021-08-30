@@ -16,18 +16,6 @@ class DaysForm(forms.Form):
     )
 
 
-class DashboardForm(forms.Form):
-    persons = forms.ChoiceField(
-        label='Количество персон',
-        choices=tuple(zip(range(1, 7), range(1, 7))),
-    )
-    meals_to_skip = forms.MultipleChoiceField(
-        label='Какие приемы пищи не нужны',
-        widget=forms.CheckboxSelectMultiple,
-        choices=MEAL_TYPE,
-    )
-
-
 class UserRegistrationForm(forms.ModelForm):
     username = forms.CharField(label='Username')
     password = forms.CharField(label='Password', widget=forms.PasswordInput)
