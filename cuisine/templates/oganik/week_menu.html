@@ -3,8 +3,9 @@
 {% block content %}
 
 {% for date, daily_serving in meals.items %}
+<div class="container">
 <div class="row justify-content-start">
-  <div class="col-3 "><p class="h2">{{ date }}</p></div>
+  <div class="col-3"><p class="h2">{{ date }}</p></div>
 </div>
 <div class="row">
   {% for dish in daily_serving.values %}
@@ -16,6 +17,7 @@
     </a>
   </div>
   {% endfor %}
+</div>
 </div>
 {% endfor %}
 

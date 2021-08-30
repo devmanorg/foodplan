@@ -1,6 +1,7 @@
 {% extends 'oganik/layouts/base.html' %}
 
 {% block content %}
+<div class="container">
 <form method="post">
   {% csrf_token %}
     <label>Введите количество дней, чтобы расчитать общее число покупок</label>
@@ -35,4 +36,5 @@
 </table>
 <h1 align="center">Итоговая сумма:  {{total_sum}} рублей</h1>
 {% endif %}
+</div>
 {% endblock %}
