@@ -12,7 +12,6 @@ from cuisine.forms import DaysForm, LoginForm, DashboardForm
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from cuisine.forms import UserRegistrationForm
-from cuisine.services import generate_menu_randomly, has_meals
 
 
 TEMPLATE = os.getenv('TEMPLATE', 'pure_bootstrap')
@@ -66,8 +65,19 @@ def index_page(request):
         saved_random_menu = [context['breakfast'].id, context['lunch'].id, context['dinner'].id]
         return render(request, f'{TEMPLATE}/index.html', context)
     else:
-        context = {'has_meals': has_meals(user=request.user, current_date=datetime.date.today())}
+        context = daily_menu(request.user)
         return render(request, f'{TEMPLATE}/index.html', context)
+        # return HttpResponseRedirect('daily_menu')
+
+
+def daily_menu(user):
+    items = (
+        MealPosition.objects
+            .filter(meal__date=datetime.date.today(), meal__customer=user)
+            .select_related('dish', 'meal')
+    )
+    context = {item.meal.meal_type.lower(): (item, item.dish.id) for item in items}
+    return context
 
 
 def generate_next_week_menu(user):
@@ -106,16 +116,38 @@ def generate_next_week_menu(user):
                 quantity=1)
 
 
-def generate_last_day_week_menu(user):
-    pass
+def generate_last_day_week_menu(user, needed_generated_menu_days):
+    dishes = Dish.objects.prefetch_related('tags')
+
+    local_dishes = {
+        'breakfast': list(dishes.filter(tags__name='завтрак')),
+        'lunch': list(dishes.filter(tags__name='обед')),
+        'dinner': list(dishes.filter(tags__name='ужин')),
+    }
+    first_date = datetime.datetime.today() + datetime.timedelta(days=needed_generated_menu_days + 1)
+    for day in range(7 - needed_generated_menu_days):
+        date = first_date + datetime.timedelta(days=day)
+        for meal_type in local_dishes:
+            meal = Meal.objects.create(
+                meal_type=meal_type.upper(),
+                date=date,
+                customer=user)
+            dish = local_dishes[meal_type].pop(random.choice(range(len(local_dishes[meal_type]))))
+            MealPosition.objects.create(
+                meal=meal,
+                dish=dish,
+                quantity=1)
+
+
 
 
 def show_next_week_menu(request):
-    end_date = datetime.datetime.today() + datetime.timedelta(days=6)
     if not Meal.objects.filter(customer=request.user):
         generate_next_week_menu(request.user)
-    if not Meal.objects.filter(customer=request.user, date=end_date):
-        generate_last_day_week_menu(request.user)
+    last_meal_date = Meal.objects.filter(customer=request.user).last().date
+    needed_generated_menu_days = (last_meal_date - datetime.datetime.today().date()).days
+    if 0 <= needed_generated_menu_days < 7:
+        generate_last_day_week_menu(request.user, needed_generated_menu_days)
 
 
     weekdays = count_days(7)
@@ -206,12 +238,7 @@ def count_days(days_count):
 
 
 def show_daily_menu(request):
-    items = (
-        MealPosition.objects
-        .filter(meal__date=datetime.date.today(), meal__customer=request.user)
-        .select_related('dish', 'meal')
-    )
-    context = {item.meal.meal_type.lower(): (item, item.dish.id) for item in items}
+    context = daily_menu(request.user)
     return render(request, f'{TEMPLATE}/daily_menu.html', context=context)
 
 
