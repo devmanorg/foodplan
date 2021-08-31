@@ -8,7 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from cuisine.models import Meal, Dish, MealPosition
 from cuisine.forms import DaysForm, LoginForm
-
+from django.urls import reverse
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from cuisine.forms import UserRegistrationForm
@@ -216,7 +216,8 @@ def register(request):
             new_user = user_form.save(commit=False)
             new_user.set_password(user_form.cleaned_data['password'])
             new_user.save()
-            return render(request, f'{TEMPLATE}/register_done.html', {'new_user': new_user})
+            # return render(request, f'{TEMPLATE}/register_done.html', {'new_user': new_user})
+            return HttpResponseRedirect('./')
     else:
         user_form = UserRegistrationForm()
     return render(request, f'{TEMPLATE}/register.html', {'user_form': user_form})
@@ -224,7 +225,7 @@ def register(request):
 
 def user_login(request):
     if request.user.is_authenticated:
-        return redirect('index')
+        return redirect(reverse('index'))
 
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -234,7 +235,7 @@ def user_login(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    return redirect('index')
+                    return redirect('cuisine:index')
                 else:
                     return HttpResponse('Disabled account')
             else:

@@ -10,7 +10,7 @@
             <div class="block-title__decor"></div><!-- /.block-title__decor -->
             <h3>Регистрация</h3>
         </div><!-- /.block-title -->
-        <form action="." class="contact-form-validated contact-one__form" method="post">
+        <form action="{% url 'register' %}" class="contact-form-validated contact-one__form" method="post">
             <div class="row">
                 <div class="col-md-12">
                     {{ user_form.username }}
