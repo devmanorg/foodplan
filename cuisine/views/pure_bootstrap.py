@@ -60,15 +60,64 @@ def get_random_menu():
 
 
 def index_page(request):
+    global saved_random_menu
     if not request.user.is_authenticated:
         context = get_random_menu()
+        saved_random_menu = [context['breakfast'].id, context['lunch'].id, context['dinner'].id]
         return render(request, f'{TEMPLATE}/index.html', context)
     else:
         context = {'has_meals': has_meals(user=request.user, current_date=datetime.date.today())}
         return render(request, f'{TEMPLATE}/index.html', context)
 
 
+def generate_next_week_menu(user):
+    dishes = Dish.objects.prefetch_related('tags')
+
+    local_dishes = {
+        'breakfast': list(dishes.filter(tags__name='завтрак')),
+        'lunch': list(dishes.filter(tags__name='обед')),
+        'dinner': list(dishes.filter(tags__name='ужин')),
+    }
+
+    for index, meal_type in enumerate(local_dishes):
+        first_day_meal = Meal.objects.create(
+            meal_type=meal_type.upper(),
+            date=datetime.datetime.today(),
+            customer=user)
+        MealPosition.objects.create(
+            meal=first_day_meal,
+            dish=dishes.get(id=saved_random_menu[index]),
+            quantity=1)
+    for index, dish in enumerate(local_dishes):
+        local_dishes[dish].remove(dishes.get(id=saved_random_menu[index]))
+
+    first_date = datetime.datetime.today() + datetime.timedelta(days=1)
+    for day in range(6):
+        date = first_date + datetime.timedelta(days=day)
+        for meal_type in local_dishes:
+            meal = Meal.objects.create(
+                meal_type=meal_type.upper(),
+                date=date,
+                customer=user)
+            dish = local_dishes[meal_type].pop(random.choice(range(len(local_dishes[meal_type]))))
+            MealPosition.objects.create(
+                meal=meal,
+                dish=dish,
+                quantity=1)
+
+
+def generate_last_day_week_menu(user):
+    pass
+
+
 def show_next_week_menu(request):
+    end_date = datetime.datetime.today() + datetime.timedelta(days=6)
+    if not Meal.objects.filter(customer=request.user):
+        generate_next_week_menu(request.user)
+    if not Meal.objects.filter(customer=request.user, date=end_date):
+        generate_last_day_week_menu(request.user)
+
+
     weekdays = count_days(7)
     meals = (
         Meal.objects
@@ -201,9 +250,9 @@ def user_login(request):
     return render(request, f'{TEMPLATE}/registration/login.html', {'form': form})
 
 
-def generate_menu(request):
-    is_generated = generate_menu_randomly(user=request.user, current_dt=datetime.datetime.now())
-    if is_generated:
-        return redirect('week_menu')
-    else:
-        return redirect('index')
+# def generate_menu(request):
+#     is_generated = generate_menu_randomly(user=request.user, current_dt=datetime.datetime.now())
+#     if is_generated:
+#         return redirect('week_menu')
+#     else:
+#         return redirect('index')
