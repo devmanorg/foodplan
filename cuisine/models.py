@@ -104,7 +104,7 @@ class IngredientPosition(models.Model):
 
 
 class Meal(models.Model):
-    MEAL_TYPE = (
+    MEAL_TYPES = (
         ('BREAKFAST', 'завтрак'),
         ('LUNCH', 'обед'),
         ('DINNER', 'ужин'),
@@ -113,7 +113,7 @@ class Meal(models.Model):
     meal_type = models.CharField(
         'тип приема пищи',
         max_length=20,
-        choices=MEAL_TYPE,
+        choices=MEAL_TYPES,
         blank=True,
         db_index=True,
     )

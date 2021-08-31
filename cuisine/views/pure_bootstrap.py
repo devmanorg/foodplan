@@ -12,7 +12,7 @@ from django.template.context_processors import csrf
 
 from cuisine.models import Meal, Dish, MealPosition
 from cuisine.forms import DaysForm, LoginForm, UserRegistrationForm
-from cuisine.services import generate_dates_from_today, generate_daily_menu_randomly
+from cuisine.services import generate_dates_from_today, generate_daily_menu_randomly, regenerate_and_save_menu
 
 TEMPLATE = os.getenv('TEMPLATE', 'pure_bootstrap')
 logger = logging.getLogger(__name__)
@@ -88,12 +88,7 @@ def generate_last_day_week_menu(user: User, needed_generated_menu_days) -> HttpR
 
 
 def show_next_week_menu(request: HttpRequest) -> HttpResponse:
-    if not Meal.objects.filter(customer=request.user):
-        generate_next_week_menu(request.user)
-    last_meal_date = Meal.objects.filter(customer=request.user).last().date
-    needed_generated_menu_days = (last_meal_date - datetime.datetime.today().date()).days
-    if 0 <= needed_generated_menu_days < 7:
-        generate_last_day_week_menu(request.user, needed_generated_menu_days)
+    regenerate_and_save_menu(request.user)
 
     weekdays = generate_dates_from_today(days_count=7)
     meals = (
