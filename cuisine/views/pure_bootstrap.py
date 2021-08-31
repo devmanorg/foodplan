@@ -1,50 +1,33 @@
 import datetime
+import logging
 import os
 import random
 
 from django.contrib.auth import authenticate, login
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
+from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.context_processors import csrf
 
 from cuisine.models import Meal, Dish, MealPosition
 from cuisine.forms import DaysForm, LoginForm, UserRegistrationForm
-
+from cuisine.services import generate_dates_from_today, generate_daily_menu_randomly
 
 TEMPLATE = os.getenv('TEMPLATE', 'pure_bootstrap')
+logger = logging.getLogger(__name__)
 
 
-def get_random_menu():
-    dishes = Dish.objects.prefetch_related('tags')
-    random_menu = {
-        'breakfast': random.choice(dishes.filter(tags__name='завтрак')),
-        'lunch': random.choice(dishes.filter(tags__name='обед')),
-        'dinner': random.choice(dishes.filter(tags__name='ужин')),
-    }
-    return random_menu
-
-
-def index_page(request):
+def index_page(request: HttpRequest) -> HttpResponse:
     global saved_random_menu
     if not request.user.is_authenticated:
-        context = get_random_menu()
+        context = generate_daily_menu_randomly()
         saved_random_menu = [context['breakfast'].id, context['lunch'].id, context['dinner'].id]
         return render(request, f'{TEMPLATE}/index.html', context)
     else:
         return redirect('week_menu')
 
 
-def daily_menu(user):
-    items = (
-        MealPosition.objects
-        .filter(meal__date=datetime.date.today(), meal__customer=user)
-        .select_related('dish', 'meal')
-    )
-    context = {item.meal.meal_type.lower(): (item, item.dish.id) for item in items}
-    return context
-
-
-def generate_next_week_menu(user):
+def generate_next_week_menu(user: User):
     dishes = Dish.objects.prefetch_related('tags')
 
     local_dishes = {
@@ -80,7 +63,7 @@ def generate_next_week_menu(user):
                 quantity=1)
 
 
-def generate_last_day_week_menu(user, needed_generated_menu_days):
+def generate_last_day_week_menu(user: User, needed_generated_menu_days) -> HttpResponse:
     dishes = Dish.objects.prefetch_related('tags')
 
     local_dishes = {
@@ -103,7 +86,7 @@ def generate_last_day_week_menu(user, needed_generated_menu_days):
                 quantity=1)
 
 
-def show_next_week_menu(request):
+def show_next_week_menu(request: HttpRequest) -> HttpResponse:
     if not Meal.objects.filter(customer=request.user):
         generate_next_week_menu(request.user)
     last_meal_date = Meal.objects.filter(customer=request.user).last().date
@@ -111,7 +94,7 @@ def show_next_week_menu(request):
     if 0 <= needed_generated_menu_days < 7:
         generate_last_day_week_menu(request.user, needed_generated_menu_days)
 
-    weekdays = count_days(7)
+    weekdays = generate_dates_from_today(days_count=7)
     meals = (
         Meal.objects
         .select_related('customer')
@@ -135,13 +118,13 @@ def show_next_week_menu(request):
     return render(request, f'{TEMPLATE}/week_menu.html', context={'meals': serialized_meals})
 
 
-def calculate_products(request):
+def calculate_products(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = DaysForm(request.POST)
         if not form.is_valid():
             return render(request, f'{TEMPLATE}/calculator.html')
         days_to_calculate = int(request.POST.get('days', 0))
-        weekdays = count_days(days_to_calculate)
+        weekdays = generate_dates_from_today(days_to_calculate)
 
         ingredients = (
             Meal.objects
@@ -182,24 +165,12 @@ def calculate_products(request):
     return render(request, f'{TEMPLATE}/calculator.html', context)
 
 
-def view_recipe(request, recipe_id):
+def view_recipe(request: HttpRequest, recipe_id: int) -> HttpResponse:
     dish = get_object_or_404(Dish, pk=recipe_id)
     return render(request, f'{TEMPLATE}/recipe.html', context={'recipe': dish})
 
 
-def count_days(days_count):
-    return [
-        datetime.date.today() + datetime.timedelta(days=day)
-        for day in range(days_count)
-    ]
-
-
-# def show_daily_menu(request):
-#     context = daily_menu(request.user)
-#     return render(request, f'{TEMPLATE}/daily_menu.html', context=context)
-
-
-def register(request):
+def register(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         user_form = UserRegistrationForm(request.POST)
         if user_form.is_valid():
@@ -212,7 +183,7 @@ def register(request):
     return render(request, f'{TEMPLATE}/register.html', {'user_form': user_form})
 
 
-def user_login(request):
+def user_login(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         return redirect('index')
 

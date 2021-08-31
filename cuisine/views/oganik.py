@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from cuisine.forms import UserRegistrationForm
-from cuisine.services import generate_menu_randomly
+from cuisine.services import generate_and_save_menu_randomly
 
 TEMPLATE = os.getenv('TEMPLATE', 'oganik')
 MEAL_TYPE_RU_TO_EN = {'завтрак': 'breakfast', 'обед': 'lunch', 'ужин': 'dinner'}
@@ -246,7 +246,7 @@ def user_login(request):
 
 
 def generate_menu(request):
-    is_generated = generate_menu_randomly(user=request.user, current_dt=datetime.datetime.now())
+    is_generated = generate_and_save_menu_randomly(user=request.user, current_dt=datetime.datetime.now())
     if is_generated:
         return redirect('week_menu')
     else:

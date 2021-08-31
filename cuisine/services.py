@@ -1,6 +1,7 @@
 import logging
 import random
 import datetime
+from typing import List, Dict
 
 from django.contrib.auth.models import User
 
@@ -16,14 +17,31 @@ _MEAL_TYPE_TO_TAGS = {
 }
 
 
-def generate_menu_randomly(user: User, current_dt: datetime.datetime) -> bool:
+def generate_daily_menu_randomly() -> Dict[str, Dish]:
+    dishes = Dish.objects.prefetch_related('tags')
+    random_menu = {
+        'breakfast': random.choice(dishes.filter(tags__name='завтрак')),
+        'lunch': random.choice(dishes.filter(tags__name='обед')),
+        'dinner': random.choice(dishes.filter(tags__name='ужин')),
+    }
+    return random_menu
+
+
+def generate_dates_from_today(days_count: int) -> List[datetime.date]:
+    return [
+        datetime.date.today() + datetime.timedelta(days=day)
+        for day in range(days_count)
+    ]
+
+
+def generate_and_save_menu_randomly(user: User, current_dt: datetime.datetime) -> bool:
     logger.info('Hello')
     if has_meals(user, current_dt.date()):
         logger.info('return False')
         return False
 
-    generate_meal_for_current_day(current_dt, user)
-    generate_meal_for_next_days(current_dt.date(), user, days_count=6)
+    generate_and_save_meal_for_current_day(current_dt, user)
+    generate_and_save_meal_for_next_days(current_dt.date(), user, days_count=6)
     return True
 
 
@@ -32,26 +50,26 @@ def has_meals(user: User, current_date: datetime.date) -> bool:
     return Meal.objects.filter(date__gte=current_date, date__lte=end_date, customer=user).exists()
 
 
-def generate_meal_for_current_day(current_dt: datetime.datetime, user: User):
+def generate_and_save_meal_for_current_day(current_dt: datetime.datetime, user: User):
     logger.info('start generate_meal_for_current_day')
     logger.info(f'{current_dt.time().hour=}')
     for max_hour, meal_type in [(10, 'BREAKFAST'), (16, 'LUNCH'), (24, 'DINNER')]:
         if current_dt.time().hour >= max_hour:
             continue
-        generate_meal_randomly(current_dt.date(), user, meal_type)
+        generate_and_save_meal_randomly(current_dt.date(), user, meal_type)
 
 
-def generate_meal_for_next_days(current_date: datetime.date, user: User, days_count: int):
+def generate_and_save_meal_for_next_days(current_date: datetime.date, user: User, days_count: int):
     logger.info('start generate_meal_for_next_days')
 
     for day in range(1, days_count + 1):
         date = current_date + datetime.timedelta(days=day)
-        generate_meal_randomly(date, user, meal_type='BREAKFAST')
-        generate_meal_randomly(date, user, meal_type='LUNCH')
-        generate_meal_randomly(date, user, meal_type='DINNER')
+        generate_and_save_meal_randomly(date, user, meal_type='BREAKFAST')
+        generate_and_save_meal_randomly(date, user, meal_type='LUNCH')
+        generate_and_save_meal_randomly(date, user, meal_type='DINNER')
 
 
-def generate_meal_randomly(date: datetime.date, user: User, meal_type: str):
+def generate_and_save_meal_randomly(date: datetime.date, user: User, meal_type: str):
     meal = Meal.objects.create(meal_type=meal_type, date=date, customer=user)
     meal.save()
 
