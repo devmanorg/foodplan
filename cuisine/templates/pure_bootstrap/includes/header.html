@@ -7,24 +7,14 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav d-flex">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#"></a>
+          <a class="nav-link" aria-current="page" href="#"></a>
         </li>
         {% if request.user.is_authenticated %}
-        {% if request.user.first_name %}  
-        <li class="nav-link">Добро пожаловать, {{ request.user.first_name }}!</li>
-        {% else %}
-        <li class="nav-link">Добро пожаловать, {{ request.user }}!</li>
-        {% endif %}
-        <li class="nav-link"></li>
-        <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-          Меню
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <li><a class="dropdown-item" href="{% url 'week_menu' %}">На неделю</a></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="{% url 'calculator' %}">Список покупок</a></li>
-        </ul>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'week_menu' %}">Меню</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'calculator' %}">Список покупок</a>
         </li>
           <li ><a class="nav-link" href="{% url 'logout' %}">Выйти</a></li>
         {% else %}

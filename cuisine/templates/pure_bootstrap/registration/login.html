@@ -10,24 +10,16 @@
     {% else %}
         <p>Пожалуйста, используйте следующую форму для входа:</p>
     {% endif %}
-    <div class="login-form">
+<div id="formContent">
+<div class="row justify-content-center">
+    <div class="col-md-6">
         <form action="{% url 'login' %}" method="post">
-            <table align="center">
-                <tr>
-                  <td>Username</td>
-                  <td>{{ form.username }}</td>
-                </tr>
-
-                <tr>
-                  <td>Password</td>
-                  <td>{{ form.password }}</td>
-                </tr>
-                </table>
-
-            <br>
+            {{ form.as_p }}
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ next }}"/>
-            <p><input type="submit" value="Log-in"></p>
+            <p><input type="submit" value="Войти"></p>
         </form>
     </div>
+</div>
+</div>
 {% endblock %}

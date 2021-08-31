@@ -2,77 +2,61 @@
 
 {% block content %}
     {%  if not request.user.is_authenticated %}
-    <center>
-  <h2>Случайное меню</h2>
+<center>
+  <h2>Ваше случайное меню:</h2>
 </center>
 
 <hr/>
-<table class="table table-responsive">
-  <tr>
-    <th>Завтрак</th>
-    <th>Обед</th>
-    <th>Ужин</th>
-  </tr>
-  <tr>
-    <th>
-      <a href="{% url 'recipe' breakfast.id %}">{{ breakfast }}</a>
-        <br>
-        <br>
-        <img src="{{ breakfast.image.url }}" class="card-img" style="max-width: 100;">
-    </th>
-    <th>
-      <a href="{% url 'recipe' lunch.id %}">{{ lunch }}</a>
-        <br>
-        <br>
-        <img src="{{ lunch.image.url }}" class="card-img" style="max-width: 100">
-    </th>
-    <th>
-        <a href="{% url 'recipe' dinner.id %}">{{ dinner }}</a>
-        <br>
-        <br>
-        <img src="{{ dinner.image.url }}" class="card-img" style="max-width: 100">
-    </th>
-  </tr>
-</table>
-          <h4>Хочешь такое же меню на неделю? <a href="{% url 'register' %}">Регистрируйся</a></h4>
+<div class="row justify-content-center">
+    <div class="col-md-3 row justify-content-center">
+    <div class="col-md-12">
+    Завтрак
+    </div>
+    <div class="col-md-12">
+      <a href="{% url 'recipe' breakfast.id %}">
+      <div class="col-md-12 justify-content-center">
+      <div class="box col-md-12 justify-content-center">
+      
+        <img src="{{ breakfast.image.url }}" class="card-img">
+      </div>
+      </div>
+        <p>{{ breakfast }}</p>
+      </a>
+    </div>
+    </div>
+
+    <div class="col-md-3 row justify-content-center">
+    <div class="col-md-12">
+    Обед
+    </div>
+    <div class="col-md-12">
+      <a href="{% url 'recipe' lunch.id %}">
+      <div class="box col-md-12 justify-content-center">
+        <img src="{{ lunch.image.url }}" class="card-img">
+      </div>
+        <p>{{ lunch }}</p>
+      </a>
+    </div>
+    </div>
+
+    <div class="col-md-3 row justify-content-center">
+    <div class="col-md-12">
+    Ужин
+    </div>
+    <div class="col-md-12">
+      <a href="{% url 'recipe' dinner.id %}">
+      <div class="box col-md-12 justify-content-center">
+        <img src="{{ dinner.image.url }}" class="card-img">
+      </div>
+        <p>{{ dinner }}</p>
+      </a>
+    </div>
+    </div>
+
+    
+</div>
+<div class="row justify-content-center">
+<div class="col-12 "><h4>Хочешь такое же меню на неделю? <a href="{% url 'register' %}">Регистрируйся</a></h4></div>
+</div>
     {% endif %}
-
-    {%  if request.user.is_authenticated %}
-        <center>
-  <h2>Меню на день</h2>
-        </center>
-
-        <table class="table table-responsive">
-
-          <tr>
-            <th>Завтрак</th>
-            <th>Обед</th>
-            <th>Ужин</th>
-          </tr>
-          <tr>
-            <th>
-                {% if breakfast %}
-              <a href="{% url 'recipe' breakfast.1 %}">{{ breakfast.0 }}</a>
-                <br>
-                <img src="{{ breakfast.0.dish.image.url }}" class="card-img" style="max-width: 100;">
-                {% endif %}
-            </th>
-            <th>
-                {% if lunch %}
-              <a href="{% url 'recipe' lunch.1 %}">{{ lunch.0 }}</a>
-                <br>
-                <img src="{{ lunch.0.dish.image.url }}" class="card-img" style="max-width: 100">
-                {% endif %}
-            </th>
-            <th>
-                <a href="{% url 'recipe' dinner.1 %}">{{ dinner.0 }}</a>
-                <br>
-                <img src="{{ dinner.0.dish.image.url }}" class="card-img" style="max-width: 100">
-            </th>
-          </tr>
-        </table>
-
-
-    {% endif %}
-
 {% endblock %}

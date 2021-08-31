@@ -17,8 +17,8 @@ class DaysForm(forms.Form):
 
 
 class UserRegistrationForm(forms.ModelForm):
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Username'}))
-    password = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
+    username = forms.CharField(label='Никнейм', widget=forms.TextInput(attrs={'placeholder': 'Никнейм'}))
+    password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'placeholder': 'Пароль'}))
 
     class Meta:
         model = User
@@ -26,8 +26,8 @@ class UserRegistrationForm(forms.ModelForm):
 
 
 class LoginForm(forms.ModelForm):
-    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Username'}))
-    password = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
+    username = forms.CharField(label='Никнейм', widget=forms.TextInput(attrs={'placeholder': 'Никнейм'}))
+    password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'placeholder': 'Пароль'}))
 
     class Meta:
         model = User
