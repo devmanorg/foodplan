@@ -216,8 +216,7 @@ def register(request):
             new_user = user_form.save(commit=False)
             new_user.set_password(user_form.cleaned_data['password'])
             new_user.save()
-            # return render(request, f'{TEMPLATE}/register_done.html', {'new_user': new_user})
-            return HttpResponseRedirect('./')
+            return render(request, f'{TEMPLATE}/register_done.html', {'new_user': new_user})
     else:
         user_form = UserRegistrationForm()
     return render(request, f'{TEMPLATE}/register.html', {'user_form': user_form})
@@ -225,7 +224,7 @@ def register(request):
 
 def user_login(request):
     if request.user.is_authenticated:
-        return redirect(reverse('index'))
+        return redirect('week_menu')
 
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -235,7 +234,7 @@ def user_login(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    return redirect('cuisine:index')
+                    return redirect('week_menu')
                 else:
                     return HttpResponse('Disabled account')
             else:
