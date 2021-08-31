@@ -3,12 +3,18 @@
 {% block title %}Создайте профиль{% endblock %}
 
 {% block content %}
-    <h1>Создайте профиль</h1>
-    <p>Пожалуйста, заполните следующую форму:</p>
-    <form action="." method="post">
-    
-        {{ user_form.as_p }}
-        {% csrf_token %}
-        <p><input type="submit" value="Create my account"></p>
-    </form>
+<h1>Создайте профиль</h1>
+<div id="formContent">
+<div class="row justify-content-center">
+    <div class="col-md-6 ">
+        <p>Пожалуйста, заполните следующую форму:</p>
+        <form action="." method="post">
+        
+            {{ user_form.as_p }}
+            {% csrf_token %}
+            <p><input type="submit" value="Создать аккаунт"></p>
+        </form>
+    </div>
+</div>
+</div>
 {% endblock %}
