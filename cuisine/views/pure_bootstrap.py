@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import random
+from collections import defaultdict
 
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse, HttpRequest
@@ -102,20 +103,16 @@ def show_next_week_menu(request: HttpRequest) -> HttpResponse:
         .order_by('date')
         .prefetch_related('meal_positions__dish')
     )
-    serialized_meals = {}
-    for meal in meals:
-        positions = {}
-        for position in meal.meal_positions.all():
-            positions.setdefault('id', position.dish.id)
-            positions.setdefault('dish', position.dish.name)
-            positions.setdefault('meal_type', position)
-            positions.setdefault('quantity', position.quantity)
-            positions.setdefault('image', position.dish.image)
-        meal_type = {meal.get_meal_type_display(): positions}
-        serialized_meals.setdefault(meal.date, meal_type)
-        serialized_meals[meal.date].update(meal_type)
 
-    return render(request, f'{TEMPLATE}/week_menu.html', context={'meals': serialized_meals})
+    serialized_meals = defaultdict(list)
+    for meal in meals:
+        dish = meal.meal_positions.first().dish
+        positions = {
+            'id': dish.id, 'name': dish.name, 'image_url': dish.image.url, 'meal_type': meal.get_meal_type_display(),
+        }
+        serialized_meals[meal.date].append(positions)
+
+    return render(request, f'{TEMPLATE}/week_menu.html', context={'meals': serialized_meals.items()})
 
 
 def calculate_products(request: HttpRequest) -> HttpResponse:

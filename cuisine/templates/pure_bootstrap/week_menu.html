@@ -1,23 +1,25 @@
 {% extends 'pure_bootstrap/layouts/base.html' %}
 
 {% block content %}
-
-{% for date, daily_serving in meals.items %}
+<h1 class="text-center">Меню на неделю</h1>
+{% for date, dishes in meals %}
+<hr>
 <div class="row justify-content-end">
   <div class="col-3 "><p class="h2">{{ date }}</p></div>
 </div>
 <div class="row justify-content-center">
-  {% for dish in daily_serving.values %}
+  {% for dish in dishes %}
   <div class="item row  p-2 m-2 col-md-3">
     <a href="{% url 'recipe' dish.id %}">
     <div class="box col-md-12">
-    <img src="{{dish.image.url}}"  class="card-img" style="max-width: 300px;" alt="блюдо">
+    <img src="{{dish.image_url}}"  class="card-img" style="max-width: 300px;" alt="блюдо">
     </div>
-    <p class="h4 m-2 p-1">{{dish.dish}}</p>
+    <p class="h4 m-2 p-1">{{dish.name}} </p>
+      <p><span class="badge bg-primary">{{dish.meal_type}}</span></p>
+
     </a>
   </div>
   {% endfor %}
 </div>
-<hr>
 {% endfor %}
 {% endblock %}
