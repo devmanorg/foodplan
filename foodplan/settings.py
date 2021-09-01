@@ -31,7 +31,7 @@ STATICFILES_DIRS = [
 SECRET_KEY = 'django-insecure-6m2=(1i4_+@xvjdhkdqf#q@j5t5*!o=lz@_!tnmod&o7%skg1a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('DEBUG', True)
+DEBUG = env.bool('DEBUG', False)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['foodplanlike.pythonanywhere.com', '127.0.0.1'])
 
@@ -57,12 +57,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'global_login_required.GlobalLoginRequiredMiddleware',
+    'global_login_required.GlobalLoginRequiredMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 # LOGIN_URL = 'login/'
-# PUBLIC_PATHS = ['^/admin/.*', '/logout', '/login', '/register']
+PUBLIC_PATHS = ['^/admin/.*', '/logout', '/login', '/register']
 
 ROOT_URLCONF = 'foodplan.urls'
 
