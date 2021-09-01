@@ -33,6 +33,6 @@
     {% endfor %}
   </tbody>
 </table>
-<h1 align="center">Итоговая сумма:  {{total_price}} рублей</h1>
+<h1 align="center">Итоговая сумма: {{total_price|floatformat:2}} рублей</h1>
 {% endif %}
 {% endblock %}
