@@ -40,8 +40,8 @@ urlpatterns = [
     path('recipe/<int:recipe_id>', views.view_recipe, name='recipe'),
     path('__debug__/', include(debug_toolbar.urls)),
     url(r'^register/$', views.register, name='register'),
-    url(r'^login/$', LoginView.as_view(template_name=f'{TEMPLATE}/registration/login.html'), name='login'),
-    url(r'^logout/$', LogoutView.as_view(template_name=f'{TEMPLATE}/registration/logged_out.html'), name='logout'),
+    url(r'^login/$', LoginView.as_view(template_name=f'{TEMPLATE}/login.html'), name='login'),
+    url(r'^logout/$', LogoutView.as_view(template_name=f'{TEMPLATE}/logged_out.html'), name='logout'),
 ]
 
 urlpatterns.extend(static(settings.STATIC_URL, document_root=settings.STATIC_ROOT))
