@@ -28,7 +28,7 @@
       <tr>
         <td>{{ingredient.name}}</td>
         <td>{{ingredient.total_quantity}} {{ingredient.units_name}}</td>
-        <td>{{ingredient.total_price}} р.</td>
+        <td>{{ingredient.total_price|floatformat:2}} р.</td>
       </tr>
     {% endfor %}
   </tbody>
