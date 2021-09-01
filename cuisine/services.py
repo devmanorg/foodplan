@@ -1,4 +1,3 @@
-import logging
 import math
 import random
 import datetime
@@ -52,11 +51,6 @@ def generate_dates_from_today(days_count: int) -> List[datetime.date]:
         datetime.date.today() + datetime.timedelta(days=day)
         for day in range(days_count)
     ]
-
-
-def has_meals(user: User, current_date: datetime.date) -> bool:
-    end_date = current_date + datetime.timedelta(days=6)
-    return Meal.objects.filter(date__gte=current_date, date__lte=end_date, customer=user).exists()
 
 
 def aggregate_ingredients(user: User, weekdays: List[datetime.date]) -> List[Dict[str, str]]:

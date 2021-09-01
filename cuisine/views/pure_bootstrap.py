@@ -21,72 +21,11 @@ logger = logging.getLogger(__name__)
 
 
 def index_page(request: HttpRequest) -> HttpResponse:
-    global saved_random_menu
     if not request.user.is_authenticated:
         context = generate_daily_menu_randomly()
-        saved_random_menu = [context['breakfast'].id, context['lunch'].id, context['dinner'].id]
         return render(request, f'{TEMPLATE}/index.html', context)
     else:
         return redirect('week_menu')
-
-
-def generate_next_week_menu(user: User):
-    dishes = Dish.objects.prefetch_related('tags')
-
-    local_dishes = {
-        'breakfast': list(dishes.filter(tags__name='завтрак')),
-        'lunch': list(dishes.filter(tags__name='обед')),
-        'dinner': list(dishes.filter(tags__name='ужин')),
-    }
-
-    for index, meal_type in enumerate(local_dishes):
-        first_day_meal = Meal.objects.create(
-            meal_type=meal_type.upper(),
-            date=datetime.datetime.today(),
-            customer=user)
-        MealPosition.objects.create(
-            meal=first_day_meal,
-            dish=dishes.get(id=saved_random_menu[index]),
-            quantity=1)
-    for index, dish in enumerate(local_dishes):
-        local_dishes[dish].remove(dishes.get(id=saved_random_menu[index]))
-
-    first_date = datetime.datetime.today() + datetime.timedelta(days=1)
-    for day in range(6):
-        date = first_date + datetime.timedelta(days=day)
-        for meal_type in local_dishes:
-            meal = Meal.objects.create(
-                meal_type=meal_type.upper(),
-                date=date,
-                customer=user)
-            dish = local_dishes[meal_type].pop(random.choice(range(len(local_dishes[meal_type]))))
-            MealPosition.objects.create(
-                meal=meal,
-                dish=dish,
-                quantity=1)
-
-
-def generate_last_day_week_menu(user: User, needed_generated_menu_days) -> HttpResponse:
-    dishes = Dish.objects.prefetch_related('tags')
-
-    local_dishes = {
-        'breakfast': list(dishes.filter(tags__name='завтрак')),
-        'lunch': list(dishes.filter(tags__name='обед')),
-        'dinner': list(dishes.filter(tags__name='ужин')),
-    }
-    first_date = datetime.datetime.today() + datetime.timedelta(days=needed_generated_menu_days + 1)
-    for day in range(7 - needed_generated_menu_days):
-        date = first_date + datetime.timedelta(days=day)
-        for meal_type in local_dishes:
-            meal = Meal.objects.create(
-                meal_type=meal_type.upper(),
-                date=date,
-                customer=user)
-            dish = local_dishes[meal_type].pop(random.choice(range(len(local_dishes[meal_type]))))
-            MealPosition.objects.create(
-                meal=meal,
-                dish=dish,
-                quantity=1)
 
 
 def show_next_week_menu(request: HttpRequest) -> HttpResponse:
@@ -104,10 +43,10 @@ def show_next_week_menu(request: HttpRequest) -> HttpResponse:
     serialized_meals = defaultdict(list)
     for meal in meals:
         dish = meal.meal_positions.first().dish
-        positions = {
+        serialized_meal = {
             'id': dish.id, 'name': dish.name, 'image_url': dish.image.url, 'meal_type': meal.get_meal_type_display(),
         }
-        serialized_meals[meal.date].append(positions)
+        serialized_meals[meal.date].append(serialized_meal)
 
     return render(request, f'{TEMPLATE}/week_menu.html', context={'meals': serialized_meals.items()})
 
