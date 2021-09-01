@@ -1,18 +1,20 @@
-import datetime
 import logging
 import os
-import random
 from collections import defaultdict
 
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse, HttpRequest
-from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.context_processors import csrf
 
-from cuisine.models import Meal, Dish, MealPosition
+from cuisine.models import Meal, Dish
 from cuisine.forms import DaysForm, LoginForm, UserRegistrationForm
-from cuisine.services import generate_dates_from_today, generate_daily_menu_randomly, regenerate_and_save_menu
+from cuisine.services import (
+    generate_dates_from_today,
+    generate_daily_menu_randomly,
+    regenerate_and_save_menu,
+    aggregate_ingredients,
+)
 
 TEMPLATE = os.getenv('TEMPLATE', 'pure_bootstrap')
 logger = logging.getLogger(__name__)
@@ -115,36 +117,14 @@ def calculate_products(request: HttpRequest) -> HttpResponse:
         form = DaysForm(request.POST)
         if not form.is_valid():
             return render(request, f'{TEMPLATE}/calculator.html')
-        days_to_calculate = int(request.POST.get('days', 0))
-        weekdays = generate_dates_from_today(days_to_calculate)
 
-        ingredients = (
-            Meal.objects
-            .filter(date__in=weekdays, customer=request.user)
-            .values_list(
-                'meal_positions__dish__positions__ingredient__name',
-                'meal_positions__dish__positions__quantity',
-                'meal_positions__dish__positions__ingredient__units',
-                'meal_positions__dish__positions__ingredient__price',
-            )
-        )
-
-        total_ingredients = {}
-        total_sum = 0
-        for ingredient, quantity, units, price in ingredients:
-            if price is None:
-                price = 0
-            total_ingredients.setdefault(ingredient, [0, units, 0])
-            total_ingredients[ingredient][0] += float(f'{quantity:.2f}')
-            ingredient_price = quantity * int(price)
-            if units == 'г' or units == 'мл':
-                ingredient_price = quantity * int(price) / 1000
-            total_ingredients[ingredient][2] += float(f'{ingredient_price:.2f}')
-            total_sum += ingredient_price
+        weekdays = generate_dates_from_today(days_count=int(request.POST.get('days', 0)))
+        aggregated_ingredients = aggregate_ingredients(request.user, weekdays)
 
         context = {
-            'ingredients': total_ingredients, 'form': form,
-            'total_sum': round(total_sum)
+            'ingredients': aggregated_ingredients,
+            'form': form,
+            'total_price': sum(ingredient['total_price'] for ingredient in aggregated_ingredients),
         }
         context.update(csrf(request))
         if weekdays:

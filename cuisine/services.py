@@ -57,3 +57,32 @@ def generate_dates_from_today(days_count: int) -> List[datetime.date]:
 def has_meals(user: User, current_date: datetime.date) -> bool:
     end_date = current_date + datetime.timedelta(days=6)
     return Meal.objects.filter(date__gte=current_date, date__lte=end_date, customer=user).exists()
+
+
+def aggregate_ingredients(user: User, weekdays: List[datetime.date]) -> List[Dict[str, str]]:
+    ingredients = Meal.objects.filter(date__in=weekdays, customer=user).values_list(
+        'meal_positions__dish__positions__ingredient__name',
+        'meal_positions__dish__positions__quantity',
+        'meal_positions__dish__positions__ingredient__units',
+        'meal_positions__dish__positions__ingredient__price',
+    )
+
+    _aggregated_ingredients = {}
+    for name, quantity, units_name, price_per_unit in ingredients:
+        price_per_unit = float(price_per_unit) if price_per_unit is not None else 0
+
+        if name not in _aggregated_ingredients:
+            _aggregated_ingredients[name] = {
+                'total_quantity': 0,
+                'units_name': units_name,
+                'total_price': 0,
+            }
+
+        _aggregated_ingredients[name]['total_quantity'] += quantity
+
+        ingredient_price = quantity * price_per_unit
+        if units_name == 'г' or units_name == 'мл':
+            ingredient_price /= 1000
+        _aggregated_ingredients[name]['total_price'] += ingredient_price
+
+    return [dict({'name': name}, **aggregated_info) for name, aggregated_info in _aggregated_ingredients.items()]
