@@ -1,65 +1,82 @@
-import logging
+import math
 import random
 import datetime
+from typing import List, Dict, Sequence
 
 from django.contrib.auth.models import User
 
 from cuisine.models import MealPosition, Dish, Meal
 
-logger = logging.getLogger(__name__)
+
+def regenerate_and_save_menu(user: User):
+    meals = Meal.objects.filter(customer=user)
+    all_dishes = Dish.objects.prefetch_related('tags')
+
+    for meal_type in Meal.MEAL_TYPES:
+        meal_type_dishes = all_dishes.filter(tags__name=meal_type[1]).all()
+        meal_type_dishes = _get_random_dishes(meal_type_dishes, count=7)
+
+        for i, date in enumerate(generate_dates_from_today(days_count=7)):
+            if meals.filter(date=date, meal_type=meal_type[0]).exists():
+                continue
+
+            meal = Meal.objects.create(meal_type=meal_type[0], date=date, customer=user)
+            meal.save()
+
+            meal_position = MealPosition.objects.create(meal=meal, dish=meal_type_dishes[i], quantity=1)
+            meal_position.save()
 
 
-_MEAL_TYPE_TO_TAGS = {
-    'BREAKFAST': ['Завтраки', 'Выпечка и десерты', 'Сэндвичи'],
-    'LUNCH': ['Супы', 'Бульоны', 'Основные блюда'],
-    'DINNER': ['Основные блюда', 'Салаты', 'Паста и пицца'],
-}
+def _get_random_dishes(dishes: Sequence[Dish], count: int) -> List[Dish]:
+    dishes = list(dishes)
+    if len(dishes) < count:
+        batches_count = math.ceil(count / len(dishes))
+        dishes = dishes * batches_count
+
+    return random.sample(dishes, k=count)
 
 
-def generate_menu_randomly(user: User, current_dt: datetime.datetime) -> bool:
-    logger.info('Hello')
-    if has_meals(user, current_dt.date()):
-        logger.info('return False')
-        return False
-
-    generate_meal_for_current_day(current_dt, user)
-    generate_meal_for_next_days(current_dt.date(), user, days_count=6)
-    return True
-
-
-def has_meals(user: User, current_date: datetime.date) -> bool:
-    end_date = current_date + datetime.timedelta(days=6)
-    return Meal.objects.filter(date__gte=current_date, date__lte=end_date, customer=user).exists()
+def generate_daily_menu_randomly() -> Dict[str, Dish]:
+    dishes = Dish.objects.prefetch_related('tags')
+    random_menu = {
+        'breakfast': random.choice(dishes.filter(tags__name='завтрак')),
+        'lunch': random.choice(dishes.filter(tags__name='обед')),
+        'dinner': random.choice(dishes.filter(tags__name='ужин')),
+    }
+    return random_menu
 
 
-def generate_meal_for_current_day(current_dt: datetime.datetime, user: User):
-    logger.info('start generate_meal_for_current_day')
-    logger.info(f'{current_dt.time().hour=}')
-    for max_hour, meal_type in [(10, 'BREAKFAST'), (16, 'LUNCH'), (24, 'DINNER')]:
-        if current_dt.time().hour >= max_hour:
-            continue
-        generate_meal_randomly(current_dt.date(), user, meal_type)
+def generate_dates_from_today(days_count: int) -> List[datetime.date]:
+    return [
+        datetime.date.today() + datetime.timedelta(days=day)
+        for day in range(days_count)
+    ]
 
 
-def generate_meal_for_next_days(current_date: datetime.date, user: User, days_count: int):
-    logger.info('start generate_meal_for_next_days')
+def aggregate_ingredients(user: User, weekdays: List[datetime.date]) -> List[Dict[str, str]]:
+    ingredients = Meal.objects.filter(date__in=weekdays, customer=user).values_list(
+        'meal_positions__dish__positions__ingredient__name',
+        'meal_positions__dish__positions__quantity',
+        'meal_positions__dish__positions__ingredient__units',
+        'meal_positions__dish__positions__ingredient__price',
+    )
 
-    for day in range(1, days_count + 1):
-        date = current_date + datetime.timedelta(days=day)
-        generate_meal_randomly(date, user, meal_type='BREAKFAST')
-        generate_meal_randomly(date, user, meal_type='LUNCH')
-        generate_meal_randomly(date, user, meal_type='DINNER')
+    _aggregated_ingredients = {}
+    for name, quantity, units_name, price_per_unit in ingredients:
+        price_per_unit = float(price_per_unit) if price_per_unit is not None else 0
 
+        if name not in _aggregated_ingredients:
+            _aggregated_ingredients[name] = {
+                'total_quantity': 0,
+                'units_name': units_name,
+                'total_price': 0,
+            }
 
-def generate_meal_randomly(date: datetime.date, user: User, meal_type: str):
-    meal = Meal.objects.create(meal_type=meal_type, date=date, customer=user)
-    meal.save()
+        _aggregated_ingredients[name]['total_quantity'] += quantity
 
-    tags = _MEAL_TYPE_TO_TAGS[meal_type]
-    dishes = []
-    for dish in Dish.objects.all():
-        if dish.tags.filter(name__in=tags).exists():
-            dishes.append(dish)
+        ingredient_price = quantity * price_per_unit
+        if units_name == 'г' or units_name == 'мл':
+            ingredient_price /= 1000
+        _aggregated_ingredients[name]['total_price'] += ingredient_price
 
-    meal_position = MealPosition.objects.create(meal=meal, dish=random.choice(dishes), quantity=1)
-    meal_position.save()
+    return [dict({'name': name}, **aggregated_info) for name, aggregated_info in _aggregated_ingredients.items()]

@@ -12,7 +12,6 @@ from django.urls import reverse
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from cuisine.forms import UserRegistrationForm
-from cuisine.services import generate_menu_randomly
 
 TEMPLATE = os.getenv('TEMPLATE', 'oganik')
 MEAL_TYPE_RU_TO_EN = {'завтрак': 'breakfast', 'обед': 'lunch', 'ужин': 'dinner'}
@@ -199,16 +198,6 @@ def count_days(days_count):
     ]
 
 
-def show_daily_menu(request):
-    items = (
-        MealPosition.objects
-        .filter(meal__date=datetime.date.today(), meal__customer=request.user)
-        .select_related('dish', 'meal')
-    )
-    context = {item.meal.meal_type.lower(): (item, item.dish.id) for item in items}
-    return render(request, f'{TEMPLATE}/daily_menu.html', context=context)
-
-
 def register(request):
     if request.method == 'POST':
         user_form = UserRegistrationForm(request.POST)
@@ -242,11 +231,3 @@ def user_login(request):
     else:
         form = LoginForm()
     return render(request, f'{TEMPLATE}/registration/login.html', {'form': form})
-
-
-def generate_menu(request):
-    is_generated = generate_menu_randomly(user=request.user, current_dt=datetime.datetime.now())
-    if is_generated:
-        return redirect('week_menu')
-    else:
-        return redirect('index')

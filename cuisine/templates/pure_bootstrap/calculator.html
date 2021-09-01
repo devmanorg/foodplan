@@ -8,7 +8,7 @@
       <option value={{form.days}}></option>
     </select>
 </form>
-
+<br>
 {% if start_day %}
   {% if start_day == end_day %}
     <h3>Список покупок для приготовления пищи на сегодня</h3>
@@ -24,15 +24,15 @@
     </tr>
   </thead>
   <tbody>
-    {% for ingredient, quantity in ingredients.items %}
+    {% for ingredient in ingredients %}
       <tr>
-        <td>{{ingredient}}</td>
-        <td>{{quantity.0}} {{quantity.1}}</td>
-        <td>{{quantity.2}} р.</td>
+        <td>{{ingredient.name}}</td>
+        <td>{{ingredient.total_quantity}} {{ingredient.units_name}}</td>
+        <td>{{ingredient.total_price}} р.</td>
       </tr>
     {% endfor %}
   </tbody>
 </table>
-<h1 align="center">Итоговая сумма:  {{total_sum}} рублей</h1>
+<h1 align="center">Итоговая сумма:  {{total_price}} рублей</h1>
 {% endif %}
 {% endblock %}
